@@ -50,8 +50,20 @@ func (c *Core) SubtractBalance(user_id string, eurocents int64) error {
 		}
 	}
 
-	if before_user.Balance >= 0 && after_user.Balance < 0 {
-		// crossed zero threshold
+	runstate := types.UserNodeStateRunning
+	running_nodes, err := c.repos.UserNodeRepo.Search(&types.UserNodeSearch{
+		UserID: &before_user.ID,
+		State:  &runstate,
+	})
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"err":     err,
+			"user_id": before_user.ID,
+		}).Error("could not fetch usernodes")
+	}
+
+	if (before_user.Balance >= 0 && after_user.Balance < 0) || len(running_nodes) > 0 {
+		// crossed zero threshold or still some nodes running
 		c.AddAuditLog(&types.AuditLog{
 			Type:   types.AuditLogPaymentZero,
 			UserID: user_id,
@@ -75,39 +87,25 @@ func (c *Core) SubtractBalance(user_id string, eurocents int64) error {
 			}
 		}
 
-		runstate := types.UserNodeStateRunning
-		nodes, err := c.repos.UserNodeRepo.Search(&types.UserNodeSearch{
-			UserID: &before_user.ID,
-			State:  &runstate,
-		})
-		if err != nil {
-			logrus.WithFields(logrus.Fields{
-				"err":     err,
-				"user_id": before_user.ID,
-			}).Error("could not fetch usernodes")
-		} else if len(nodes) > 0 {
+		for _, node := range running_nodes {
+			j := types.RemoveNodeJob(node)
+			err = j.SetData(types.RemoveNodeJobData{CreateBackups: true})
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"err":     err,
+					"node_id": node.ID,
+				}).Error("could not set job data")
+				continue
+			}
 
-			for _, node := range nodes {
-				j := types.RemoveNodeJob(node)
-				err = j.SetData(types.RemoveNodeJobData{CreateBackups: true})
-				if err != nil {
-					logrus.WithFields(logrus.Fields{
-						"err":     err,
-						"node_id": node.ID,
-					}).Error("could not set job data")
-					continue
-				}
-
-				err = c.repos.JobRepo.Insert(j)
-				if err != nil {
-					logrus.WithFields(logrus.Fields{
-						"err":     err,
-						"node_id": node.ID,
-					}).Error("could not schedule removal job")
-				}
+			err = c.repos.JobRepo.Insert(j)
+			if err != nil {
+				logrus.WithFields(logrus.Fields{
+					"err":     err,
+					"node_id": node.ID,
+				}).Error("could not schedule removal job")
 			}
 		}
-
 	}
 
 	return nil
