@@ -21,7 +21,7 @@ require (
 	github.com/vearutop/statigz v1.4.3
 	github.com/wneessen/go-mail v0.5.2
 	golang.org/x/crypto v0.28.0
-	gorm.io/driver/postgres v1.5.9
+	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.25.12
 )
 
