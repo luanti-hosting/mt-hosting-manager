@@ -62,7 +62,7 @@ func (c *Core) SubtractBalance(user_id string, eurocents int64) error {
 		}).Error("could not fetch usernodes")
 	}
 
-	if (before_user.Balance >= 0 && after_user.Balance < 0) || len(running_nodes) > 0 {
+	if (before_user.Balance >= 0 && after_user.Balance < 0) && len(running_nodes) > 0 {
 		// crossed zero threshold or still some nodes running
 		c.AddAuditLog(&types.AuditLog{
 			Type:   types.AuditLogPaymentZero,
