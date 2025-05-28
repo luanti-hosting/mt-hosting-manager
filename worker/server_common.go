@@ -92,9 +92,9 @@ func (w *Worker) removeServer(node *types.UserNode, server *types.MinetestServer
 		}
 
 		basedir := server_setup.GetBaseDir(server)
-		_, _, err = core.SSHExecute(client, fmt.Sprintf("cd %s && docker-compose down -v", basedir))
+		_, _, err = core.SSHExecute(client, fmt.Sprintf("cd %s && docker compose down -v", basedir))
 		if err != nil {
-			return fmt.Errorf("could not run docker-compose down: %v", err)
+			return fmt.Errorf("could not run docker compose down: %v", err)
 		}
 
 		_, _, err = core.SSHExecute(client, fmt.Sprintf("rm -rf %s", basedir))

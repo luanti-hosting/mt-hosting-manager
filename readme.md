@@ -14,11 +14,11 @@ State: **WIP**
 
 ```sh
 # start postgres
-docker-compose up -d postgres
+docker compose up -d postgres
 # ui assets
-docker-compose up hosting_webapp
+docker compose up hosting_webapp
 # main app
-docker-compose up hosting
+docker compose up hosting
 ```
 
 # Environment variables
