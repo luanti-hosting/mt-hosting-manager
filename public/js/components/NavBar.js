@@ -13,8 +13,9 @@ export default {
 		};
 	},
 	methods: {
-		logout: function(){
-			logout().then(() => this.$router.push("/login"));
+		logout: async function(){
+			await logout();
+			this.$router.push("/login");
 		},
 		has_role: has_role
 	},
