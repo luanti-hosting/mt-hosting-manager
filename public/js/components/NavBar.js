@@ -87,7 +87,7 @@ export default {
 							<i class="fa fa-list"></i> Servers
 						</router-link>
 					</li>
-					<li class="nav-item" v-if="has_role('ADMIN')">
+					<li class="nav-item">
 						<router-link to="/backup" class="nav-link">
 							<i class="fa fa-object-group"></i> Backups
 						</router-link>
