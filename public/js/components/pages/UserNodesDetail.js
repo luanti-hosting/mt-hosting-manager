@@ -89,7 +89,7 @@ export default {
 
 			if (this.node.state == "RUNNING") {
 				const stats = await get_stats(nodeid);
-				this.load_percent = stats.load_percent;
+				this.load_percent = Math.min(stats.load_percent, 100);
 				this.disk_gb_total = get_gb_rounded(stats.disk_size);
 				this.disk_gb_used = get_gb_rounded(stats.disk_used);
 				this.disk_percent = parseInt(this.disk_gb_used / this.disk_gb_total * 100);
