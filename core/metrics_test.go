@@ -18,8 +18,8 @@ func TestNodeExporterMetrics(t *testing.T) {
 	assert.NotNil(t, metrics)
 
 	assert.Equal(t, 0, metrics.LoadPercent)
-	assert.Equal(t, int64(14058868736), metrics.DiskSize)
-	assert.Equal(t, int64(3702784), metrics.DiskUsed)
+	assert.Equal(t, int64(19809288192), metrics.DiskSize)
+	assert.Equal(t, int64(17007599616), metrics.DiskUsed)
 	assert.Equal(t, int64(2009100288), metrics.MemorySize)
 	assert.Equal(t, int64(340316160), metrics.MemoryUsed)
 }
