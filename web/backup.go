@@ -20,11 +20,8 @@ func (a *Api) CreateBackup(w http.ResponseWriter, r *http.Request, c *types.Clai
 		return
 	}
 
-	if b.UserID != c.UserID {
-		// not the owner
-		SendError(w, 401, fmt.Errorf("user-id mismatch"))
-		return
-	}
+	// assign current user's id
+	b.UserID = c.UserID
 
 	// validate given id's
 	mtserver, err := a.repos.MinetestServerRepo.GetByID(b.MinetestServerID)
@@ -46,7 +43,7 @@ func (a *Api) CreateBackup(w http.ResponseWriter, r *http.Request, c *types.Clai
 		return
 	}
 	if node.UserID != c.UserID && c.Role != types.UserRoleAdmin {
-		SendError(w, 405, fmt.Errorf("invalid data"))
+		SendError(w, 403, fmt.Errorf("not your node and not an admin"))
 		return
 	}
 
