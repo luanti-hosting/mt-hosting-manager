@@ -20,8 +20,8 @@ func (a *Api) CreateBackup(w http.ResponseWriter, r *http.Request, c *types.Clai
 		return
 	}
 
-	if b.UserID != c.UserID && c.Role != types.UserRoleAdmin {
-		// not the owner and not admin
+	if b.UserID != c.UserID {
+		// not the owner
 		SendError(w, 401, fmt.Errorf("user-id mismatch"))
 		return
 	}
