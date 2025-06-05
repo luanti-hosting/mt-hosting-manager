@@ -71,7 +71,8 @@ func (w *Worker) ServerBackup(job *types.Job) error {
 			job.NextRun = time.Now().Add(5 * time.Second).Unix()
 
 		case mtui.BackupJobSuccess:
-			// all done
+			// all done, delay a bit before checking final backup file
+			time.Sleep(10 * time.Second)
 			// get size from storage
 			size, err := w.core.GetBackupSize(backup)
 			if err != nil {
