@@ -8,7 +8,8 @@ import (
 	"time"
 )
 
-func (w *Worker) ServerSetup(job *types.Job) error {
+func (w *Worker) ServerSetup(ctx *JobContext) error {
+	job := ctx.job
 	node, server, err := w.GetJobContext(job)
 	if err != nil {
 		return err
@@ -78,8 +79,9 @@ func (w *Worker) ServerSetup(job *types.Job) error {
 		}
 
 		uw := client.UploadStream(restore_zip_filename, func(written_bytes int64) {
-			// TODO: update job / async, whatever
 			job.ProgressPercent = float64(written_bytes) / float64(backup.Size) * 100
+			job.Message = fmt.Sprintf("Transferred bytes: %d / %d (%.2f %%)", written_bytes, backup.Size, job.ProgressPercent)
+			ctx.w.repos.JobRepo.UpdateWithTx(ctx.tx, job)
 		})
 		err = w.core.StreamBackup(backup, uw)
 		if err != nil {
@@ -102,7 +104,7 @@ func (w *Worker) ServerSetup(job *types.Job) error {
 			return fmt.Errorf("set maintenance mode error: %v", err)
 		}
 
-		job.Message = "Restore complete, existing maintenance mode"
+		job.Message = "Restore complete, exiting maintenance mode"
 		job.NextRun = time.Now().Add(5 * time.Second).Unix()
 		job.Step = 2
 

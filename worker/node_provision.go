@@ -13,7 +13,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (w *Worker) NodeProvision(job *types.Job) error {
+func (w *Worker) NodeProvision(ctx *JobContext) error {
+	job := ctx.job
 	node, err := w.repos.UserNodeRepo.GetByID(*job.UserNodeID)
 	if err != nil {
 		return err

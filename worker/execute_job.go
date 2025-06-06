@@ -21,7 +21,11 @@ func (w *Worker) ExecuteJob(tx *gorm.DB, job *types.Job) {
 	if executor == nil {
 		err = errors.New("type not implemented")
 	} else {
-		err = executor(job)
+		err = executor(&JobContext{
+			tx:  tx,
+			w:   w,
+			job: job,
+		})
 	}
 
 	if err != nil {

@@ -3,9 +3,12 @@ package worker
 import (
 	"fmt"
 	"mt-hosting-manager/types"
+	"mt-hosting-manager/util"
+	"time"
 )
 
-func (w *Worker) ServerBackup(job *types.Job) error {
+func (w *Worker) ServerBackup(ctx *JobContext) error {
+	job := ctx.job
 	server, err := w.repos.MinetestServerRepo.GetByID(*job.MinetestServerID)
 	if err != nil {
 		return fmt.Errorf("get server error: %v", err)
@@ -31,8 +34,19 @@ func (w *Worker) ServerBackup(job *types.Job) error {
 	if err != nil {
 		return fmt.Errorf("download zip error: %v", err)
 	}
+	defer r.Close()
 
-	size, err := w.core.StoreBackup(backup, r)
+	last_callback := time.Time{}
+	cr := util.NewCountedReader(r, func(i int64) {
+		if time.Since(last_callback) > time.Second*5 {
+			// periodic update
+			last_callback = time.Now()
+			job.Message = fmt.Sprintf("Transferred bytes: %d", i)
+			ctx.w.repos.JobRepo.UpdateWithTx(ctx.tx, job)
+		}
+	})
+
+	size, err := w.core.StoreBackup(backup, cr)
 	if err != nil {
 		return fmt.Errorf("StoreBackup error: %v", err)
 	}

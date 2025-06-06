@@ -27,7 +27,13 @@ type Worker struct {
 	wg      *sync.WaitGroup
 }
 
-type JobExecutor func(j *types.Job) error
+type JobContext struct {
+	tx  *gorm.DB
+	w   *Worker
+	job *types.Job
+}
+
+type JobExecutor func(ctx *JobContext) error
 
 var executors = map[types.JobType]JobExecutor{}
 
