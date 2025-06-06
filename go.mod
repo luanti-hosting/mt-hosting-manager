@@ -20,7 +20,6 @@ require (
 	github.com/prometheus/common v0.60.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.9.0
-	github.com/studio-b12/gowebdav v0.9.0
 	github.com/vearutop/statigz v1.4.3
 	github.com/wneessen/go-mail v0.5.2
 	golang.org/x/crypto v0.36.0

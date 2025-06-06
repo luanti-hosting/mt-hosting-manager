@@ -77,11 +77,15 @@ func (w *Worker) ServerSetup(job *types.Job) error {
 			return fmt.Errorf("set maintenance mode error: %v", err)
 		}
 
-		uw := client.UploadStream(restore_zip_filename)
+		uw := client.UploadStream(restore_zip_filename, func(written_bytes int64) {
+			// TODO: update job / async, whatever
+			job.ProgressPercent = float64(written_bytes) / float64(backup.Size) * 100
+		})
 		err = w.core.StreamBackup(backup, uw)
 		if err != nil {
 			return fmt.Errorf("stream error: %v", err)
 		}
+		uw.Close()
 
 		err = client.UnzipFile(restore_zip_filename)
 		if err != nil {
@@ -98,7 +102,8 @@ func (w *Worker) ServerSetup(job *types.Job) error {
 			return fmt.Errorf("set maintenance mode error: %v", err)
 		}
 
-		job.State = types.JobStateDoneSuccess
+		job.Message = "Restore complete, existing maintenance mode"
+		job.NextRun = time.Now().Add(5 * time.Second).Unix()
 		job.Step = 2
 
 	case 2:

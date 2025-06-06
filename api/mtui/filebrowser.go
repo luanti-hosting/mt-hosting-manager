@@ -54,25 +54,47 @@ func (a *MtuiClient) AppendFile(filename string, offset int64, data []byte) erro
 	return nil
 }
 
+const WRITE_BUFFER_SIZE = 1024 * 1024 * 5
+
 type AppendingWriter struct {
-	filename string
-	offset   int64
-	cl       *MtuiClient
+	filename          string
+	offset            int64
+	cl                *MtuiClient
+	buf               bytes.Buffer
+	progress_callback func(int64)
 }
 
 func (aw *AppendingWriter) Write(p []byte) (int, error) {
-	err := aw.cl.AppendFile(aw.filename, aw.offset, p)
-	if err != nil {
-		return 0, err
+	// batch to prevent spamming with small requests
+
+	if aw.buf.Len()+len(p) > WRITE_BUFFER_SIZE {
+		// flush
+		err := aw.cl.AppendFile(aw.filename, aw.offset, aw.buf.Bytes())
+		if err != nil {
+			return 0, fmt.Errorf("apennding writer flush error: %v", err)
+		}
+		aw.offset += int64(aw.buf.Len())
+		aw.buf.Reset()
+		aw.progress_callback(aw.offset)
 	}
-	aw.offset += int64(len(p))
+
+	aw.buf.Write(p)
 	return len(p), nil
 }
 
-func (a *MtuiClient) UploadStream(filename string) io.Writer {
+func (aw *AppendingWriter) Close() error {
+	if aw.buf.Len() > 0 {
+		return aw.cl.AppendFile(aw.filename, aw.offset, aw.buf.Bytes())
+	}
+	return nil
+}
+
+func (a *MtuiClient) UploadStream(filename string, progress_callback func(int64)) io.WriteCloser {
 	return &AppendingWriter{
-		filename: filename,
-		cl:       a,
+		filename:          filename,
+		cl:                a,
+		buf:               *bytes.NewBuffer(make([]byte, WRITE_BUFFER_SIZE)),
+		progress_callback: progress_callback,
 	}
 }
 
