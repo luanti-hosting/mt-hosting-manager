@@ -22,7 +22,8 @@ export default {
             },{
                 icon: "object-group", name: "Backups", link: "/backup"
 			}],
-			backups: []
+			backups: [],
+			handle: null
 		};
 	},
 	methods: {
@@ -39,7 +40,11 @@ export default {
 		}
 	},
 	mounted: function() {
+		this.handle = setInterval(() => this.update_backups(), 2000);
 		this.update_backups();
+	},
+	beforeUnmount: function() {
+		clearInterval(this.handle);
 	},
 	template: /*html*/`
 	<card-layout title="Backups" icon="object-group" :breadcrumb="breadcrumb">
@@ -55,7 +60,7 @@ export default {
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="backup in backups">
+				<tr v-for="backup in backups" :key="backup.id">
 					<td>{{format_time(backup.created)}}</td>
 					<td>
 						<timestamp-badge :timestamp="backup.expires" :show_duration="true"/>

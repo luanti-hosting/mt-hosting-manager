@@ -5,7 +5,8 @@ import (
 	"mt-hosting-manager/types"
 )
 
-func (w *Worker) ServerDestroy(job *types.Job) error {
+func (w *Worker) ServerDestroy(ctx *JobContext) error {
+	job := ctx.job
 	node, server, err := w.GetJobContext(job)
 	if err != nil {
 		return err
