@@ -24,7 +24,7 @@ func (c *Core) GetS3Client() (*minio.Client, error) {
 func (c *Core) RemoveBackup(b *types.Backup) error {
 	client, err := c.GetS3Client()
 	if err != nil {
-		return fmt.Errorf("create client error: %v", err)
+		return fmt.Errorf("create s3 client error: %v", err)
 	}
 
 	err = client.RemoveObject(context.Background(), c.cfg.S3_BUCKET, getBackupFilename(b), minio.RemoveObjectOptions{})
@@ -38,28 +38,30 @@ func (c *Core) RemoveBackup(b *types.Backup) error {
 func (c *Core) StreamBackup(b *types.Backup, w io.Writer) error {
 	client, err := c.GetS3Client()
 	if err != nil {
-		return fmt.Errorf("create client error: %v", err)
+		return fmt.Errorf("create s3 client error: %v", err)
 	}
 
-	// TODO
-
-	r, err := client.ReadStream(getBackupFilename(b))
+	obj, err := client.GetObject(context.Background(), c.cfg.S3_BUCKET, getBackupFilename(b), minio.GetObjectOptions{})
 	if err != nil {
-		return fmt.Errorf("readstream error: %v", err)
-	}
-	defer r.Close()
-
-	var reader io.Reader
-	reader = r
-
-	if b.Passphrase != "" {
-		// enable decryption
-		reader, err = EncryptedReader(b.Passphrase, reader)
-		if err != nil {
-			return fmt.Errorf("decryption failed: %v", err)
-		}
+		return fmt.Errorf("client getObject error: %v", err)
 	}
 
-	_, err = io.Copy(w, reader)
+	defer obj.Close()
+
+	_, err = io.Copy(w, obj)
 	return err
+}
+
+func (c *Core) StoreBackup(b *types.Backup, r io.Reader) (int64, error) {
+	client, err := c.GetS3Client()
+	if err != nil {
+		return 0, fmt.Errorf("create s3 client error: %v", err)
+	}
+
+	info, err := client.PutObject(context.Background(), c.cfg.S3_BUCKET, getBackupFilename(b), r, -1, minio.PutObjectOptions{})
+	if err != nil {
+		return 0, fmt.Errorf("client putObject error: %v", err)
+	}
+
+	return info.Size, nil
 }

@@ -30,7 +30,7 @@ func (a *MtuiClient) DownloadZip(dir string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
-func (a *MtuiClient) AppendFile(filename string, data []byte) error {
+func (a *MtuiClient) AppendFile(filename string, offset int64, data []byte) error {
 	req, err := a.request(http.MethodPut, "api/filebrowser/file", bytes.NewReader(data))
 	if err != nil {
 		return fmt.Errorf("request error: %v", err)
@@ -38,6 +38,7 @@ func (a *MtuiClient) AppendFile(filename string, data []byte) error {
 
 	q := req.URL.Query()
 	q.Set("filename", filename)
+	q.Set("offset", fmt.Sprintf("%d", offset))
 	req.URL.RawQuery = q.Encode()
 
 	resp, err := a.client.Do(req)
@@ -51,6 +52,28 @@ func (a *MtuiClient) AppendFile(filename string, data []byte) error {
 	}
 
 	return nil
+}
+
+type AppendingWriter struct {
+	filename string
+	offset   int64
+	cl       *MtuiClient
+}
+
+func (aw *AppendingWriter) Write(p []byte) (int, error) {
+	err := aw.cl.AppendFile(aw.filename, aw.offset, p)
+	if err != nil {
+		return 0, err
+	}
+	aw.offset += int64(len(p))
+	return len(p), nil
+}
+
+func (a *MtuiClient) UploadStream(filename string) io.Writer {
+	return &AppendingWriter{
+		filename: filename,
+		cl:       a,
+	}
 }
 
 func (a *MtuiClient) DeleteFile(filename string) error {

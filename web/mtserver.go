@@ -245,7 +245,7 @@ func (a *Api) GetMTServerStats(w http.ResponseWriter, r *http.Request, c *types.
 
 	stats, err := client.GetStats()
 	if err != nil {
-		SendError(w, 500, fmt.Errorf("get stats error: %v", err))
+		SendError(w, 404, fmt.Errorf("server not ready/unresponsive: %v", err))
 		return
 	}
 

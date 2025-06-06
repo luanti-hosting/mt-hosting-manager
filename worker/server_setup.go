@@ -2,7 +2,6 @@ package worker
 
 import (
 	"fmt"
-	"mt-hosting-manager/api/mtui"
 	"mt-hosting-manager/core"
 	"mt-hosting-manager/types"
 	"mt-hosting-manager/worker/server_setup"
@@ -42,7 +41,7 @@ func (w *Worker) ServerSetup(job *types.Job) error {
 
 		if job.BackupID == nil {
 			// skip restore steps
-			job.Step = 3
+			job.Step = 2
 			return nil
 		} else {
 			// restore after the tls connection can be established
@@ -68,56 +67,41 @@ func (w *Worker) ServerSetup(job *types.Job) error {
 			return fmt.Errorf("backup not found: '%s'", *job.BackupID)
 		}
 
-		info, err := client.CreateRestoreJob(&mtui.CreateRestoreJob{
-			ID:       *job.BackupID,
-			Type:     mtui.RestoreJobTypeWEBDAV,
-			URL:      w.cfg.StorageURL,
-			Username: w.cfg.StorageUsername,
-			Password: w.cfg.StoragePassword,
-			Filename: fmt.Sprintf("%s.zip", *job.BackupID),
-			Key:      backup.Passphrase,
-		})
+		restore_zip_filename := "restore.zip"
+
+		// try to remove file if it exists
+		client.DeleteFile(restore_zip_filename)
+
+		err = client.SetMaintenanceMode(true)
 		if err != nil {
-			return fmt.Errorf("create restore job error: %v", err)
+			return fmt.Errorf("set maintenance mode error: %v", err)
 		}
 
-		job.Message = info.Message
-		job.Data = []byte(info.ID)
+		uw := client.UploadStream(restore_zip_filename)
+		err = w.core.StreamBackup(backup, uw)
+		if err != nil {
+			return fmt.Errorf("stream error: %v", err)
+		}
+
+		err = client.UnzipFile(restore_zip_filename)
+		if err != nil {
+			return fmt.Errorf("unzip error: %v", err)
+		}
+
+		err = client.DeleteFile(restore_zip_filename)
+		if err != nil {
+			return fmt.Errorf("restore-file cleanup error: %v", err)
+		}
+
+		err = client.SetMaintenanceMode(false)
+		if err != nil {
+			return fmt.Errorf("set maintenance mode error: %v", err)
+		}
+
+		job.State = types.JobStateDoneSuccess
 		job.Step = 2
-		job.NextRun = time.Now().Add(5 * time.Second).Unix()
 
 	case 2:
-		// get restore status
-
-		client, err := w.core.GetMTUIClient(server)
-		if err != nil {
-			return fmt.Errorf("get client error: %v", err)
-		}
-
-		// check restore job
-		info, err := client.GetRestoreJobInfo(string(job.Data))
-		if err != nil {
-			return fmt.Errorf("get restore job error: %v", err)
-		}
-
-		switch info.Status {
-		case mtui.RestoreJobRunning:
-			// still running
-			job.Message = info.Message
-			job.NextRun = time.Now().Add(5 * time.Second).Unix()
-
-		case mtui.RestoreJobSuccess:
-			// all done
-			job.Message = info.Message
-			job.Step = 3
-
-		case mtui.RestoreJobFailure:
-			// restore failed
-			job.Message = info.Message
-			job.State = types.JobStateDoneFailure
-		}
-
-	case 3:
 		// mark running
 
 		server.State = types.MinetestServerStateRunning
