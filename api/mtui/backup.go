@@ -7,13 +7,13 @@ import (
 	"net/http"
 )
 
-func (a *MtuiClient) CreateBackupJob(job *CreateBackupJob) (*BackupJobInfo, error) {
+func (a *MtuiClient) CreateBackupRestoreJob(job *CreateBackupRestoreJob) (*BackupRestoreInfo, error) {
 	obj, err := json.Marshal(job)
 	if err != nil {
 		return nil, fmt.Errorf("json error: %v", err)
 	}
 
-	req, err := a.request(http.MethodPost, "api/backupjob", bytes.NewReader(obj))
+	req, err := a.request(http.MethodPost, "api/backup-restore/create", bytes.NewReader(obj))
 	if err != nil {
 		return nil, fmt.Errorf("request error: %v", err)
 	}
@@ -28,7 +28,7 @@ func (a *MtuiClient) CreateBackupJob(job *CreateBackupJob) (*BackupJobInfo, erro
 		return nil, fmt.Errorf("api-response status: %d", resp.StatusCode)
 	}
 
-	info := &BackupJobInfo{}
+	info := &BackupRestoreInfo{}
 	err = json.NewDecoder(resp.Body).Decode(info)
 	if err != nil {
 		return nil, fmt.Errorf("json response error: %v", err)
@@ -37,8 +37,8 @@ func (a *MtuiClient) CreateBackupJob(job *CreateBackupJob) (*BackupJobInfo, erro
 	return info, nil
 }
 
-func (a *MtuiClient) GetBackupJobInfo(id string) (*BackupJobInfo, error) {
-	req, err := a.request(http.MethodGet, fmt.Sprintf("api/backupjob/%s", id), nil)
+func (a *MtuiClient) GetBackupRestoreJobInfo() (*BackupRestoreInfo, error) {
+	req, err := a.request(http.MethodGet, fmt.Sprintf("api/backup-restore"), nil)
 	if err != nil {
 		return nil, fmt.Errorf("request error: %v", err)
 	}
@@ -53,7 +53,7 @@ func (a *MtuiClient) GetBackupJobInfo(id string) (*BackupJobInfo, error) {
 		return nil, fmt.Errorf("api-response status: %d", resp.StatusCode)
 	}
 
-	info := &BackupJobInfo{}
+	info := &BackupRestoreInfo{}
 	err = json.NewDecoder(resp.Body).Decode(info)
 	if err != nil {
 		return nil, fmt.Errorf("json response error: %v", err)
