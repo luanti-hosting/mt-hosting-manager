@@ -143,6 +143,20 @@ func (a *Api) CreateNode(w http.ResponseWriter, r *http.Request, c *types.Claims
 		return
 	}
 
+	// prevent provisioning of multiple nodes at once
+	provision_state := types.UserNodeStateProvisioning
+	current_usernodes, err := a.repos.UserNodeRepo.Search(&types.UserNodeSearch{
+		UserID: &c.UserID,
+		State:  &provision_state,
+	})
+	if err != nil {
+		SendError(w, 500, fmt.Errorf("current usernodes fetch error: %v", err))
+		return
+	}
+	if len(current_usernodes) > 0 {
+		SendError(w, 405, fmt.Errorf("provisioning limit exceeded, only one node can be created at the same time"))
+	}
+
 	nt, err := a.repos.NodeTypeRepo.GetByID(create_node.NodeTypeID)
 	if err != nil {
 		SendError(w, 500, fmt.Errorf("nodetype fetch error: %v", err))
