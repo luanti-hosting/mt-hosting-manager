@@ -29,7 +29,7 @@ func EncryptedWriter(key string, w io.Writer) (*cipher.StreamWriter, error) {
 		return nil, err
 	}
 
-	stream := cipher.NewOFB(block, iv)
+	stream := cipher.NewCTR(block, iv)
 	return &cipher.StreamWriter{S: stream, W: w}, nil
 }
 
@@ -48,7 +48,7 @@ func EncryptedReader(key string, r io.Reader) (*cipher.StreamReader, error) {
 		return nil, err
 	}
 
-	stream := cipher.NewOFB(block, iv)
+	stream := cipher.NewCTR(block, iv)
 	return &cipher.StreamReader{S: stream, R: r}, nil
 }
 
