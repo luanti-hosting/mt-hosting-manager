@@ -1,69 +1,39 @@
 package mtui
 
-type BackupJobState string
+type BackupRestoreType string
 
 const (
-	BackupJobRunning BackupJobState = "running"
-	BackupJobSuccess BackupJobState = "success"
-	BackupJobFailure BackupJobState = "failure"
+	BackupJob  BackupRestoreType = "backup"
+	RestoreJob BackupRestoreType = "restore"
 )
 
-type BackupJobInfo struct {
-	ID      string         `json:"id"`
-	Status  BackupJobState `json:"state"`
-	Message string         `json:"message"`
+type BackupRestoreJobState string
+
+const (
+	BackupRestoreJobRunning BackupRestoreJobState = "running"
+	BackupRestoreJobSuccess BackupRestoreJobState = "success"
+	BackupRestoreJobFailure BackupRestoreJobState = "failure"
+)
+
+// new job
+type CreateBackupRestoreJob struct {
+	Type BackupRestoreType `json:"type"`
+
+	Endpoint  string `json:"endpoint"`
+	KeyID     string `json:"key_id"`
+	AccessKey string `json:"access_key"`
+	Bucket    string `json:"bucket"`
+
+	FileKey  string `json:"file_key"`
+	Filename string `json:"filename"`
 }
 
-type BackupJobType string
-
-const (
-	BackupJobTypeSCP    BackupJobType = "scp"
-	BackupJobTypeWEBDAV BackupJobType = "webdav"
-)
-
-type CreateBackupJob struct {
-	ID       string        `json:"id"`
-	Type     BackupJobType `json:"type"`
-	Host     string        `json:"host"` //scp
-	Port     int           `json:"port"` //scp
-	URL      string        `json:"url"`  // webdav
-	Filename string        `json:"filename"`
-	Username string        `json:"username"`
-	Password string        `json:"password"`
-	Key      string        `json:"key"`
-}
-
-type RestoreJobState string
-
-const (
-	RestoreJobRunning RestoreJobState = "running"
-	RestoreJobSuccess RestoreJobState = "success"
-	RestoreJobFailure RestoreJobState = "failure"
-)
-
-type RestoreJobInfo struct {
-	ID      string          `json:"id"`
-	Status  RestoreJobState `json:"state"`
-	Message string          `json:"message"`
-}
-
-type RestoreJobType string
-
-const (
-	RestoreJobTypeSCP    RestoreJobType = "scp"
-	RestoreJobTypeWEBDAV RestoreJobType = "webdav"
-)
-
-type CreateRestoreJob struct {
-	ID       string         `json:"id"`
-	Type     RestoreJobType `json:"type"`
-	Host     string         `json:"host"` //scp
-	Port     int            `json:"port"` //scp
-	URL      string         `json:"url"`  // webdav
-	Filename string         `json:"filename"`
-	Username string         `json:"username"`
-	Password string         `json:"password"`
-	Key      string         `json:"key"`
+// current job info
+type BackupRestoreInfo struct {
+	Type            BackupRestoreType     `json:"type"`
+	ProgressPercent float64               `json:"progress_percent"`
+	Message         string                `json:"message"`
+	State           BackupRestoreJobState `json:"state"`
 }
 
 type Stats struct {

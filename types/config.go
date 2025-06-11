@@ -21,35 +21,47 @@ type Config struct {
 	Webdev              bool
 	EnableWorker        bool
 	JWTKey              string
-	LogStreamKey        string
-	LogStreamDir        string
-	CookieName          string
-	CookiePath          string
-	CookieSecure        bool
-	HetznerCloudKey     string
-	HetznerApiKey       string
-	HetznerApiZoneID    string
-	CoinbaseKey         string
-	CoinbaseEnabled     bool
-	WalleeUserID        string
-	WalleeSpaceID       string
-	WalleeKey           string
-	WalleeEnabled       bool
-	ZahlschPageID       string
-	ZahlschUser         string
-	ZahlschWebhookKey   string
-	ZahlschEnabled      bool
-	GithubOauthConfig   *OAuthConfig
-	DiscordOauthConfig  *OAuthConfig
-	MesehubOauthConfig  *OAuthConfig
-	CDBOauthConfig      *OAuthConfig
-	MaxBalance          int //max balance in eurocents
-	StorageURL          string
-	StorageUsername     string
-	StoragePassword     string
-	MailHost            string
-	MailAddress         string
-	MailPassword        string
+
+	LogStreamKey string
+	LogStreamDir string
+
+	CookieName   string
+	CookiePath   string
+	CookieSecure bool
+
+	HetznerCloudKey  string
+	HetznerApiKey    string
+	HetznerApiZoneID string
+
+	CoinbaseKey     string
+	CoinbaseEnabled bool
+
+	WalleeUserID  string
+	WalleeSpaceID string
+	WalleeKey     string
+	WalleeEnabled bool
+
+	ZahlschPageID     string
+	ZahlschUser       string
+	ZahlschWebhookKey string
+	ZahlschEnabled    bool
+
+	GithubOauthConfig  *OAuthConfig
+	DiscordOauthConfig *OAuthConfig
+	MesehubOauthConfig *OAuthConfig
+	CDBOauthConfig     *OAuthConfig
+
+	MaxBalance int //max balance in eurocents
+
+	MailHost     string
+	MailAddress  string
+	MailPassword string
+
+	// backup storage
+	S3Endpoint  string
+	S3KeyID     string
+	S3AccessKey string
+	S3Bucket    string
 }
 
 func NewConfig() *Config {
@@ -104,12 +116,15 @@ func NewConfig() *Config {
 			ClientID: os.Getenv("CDB_CLIENTID"),
 			Secret:   os.Getenv("CDB_SECRET"),
 		},
-		MaxBalance:      100 * 100,
-		StorageURL:      os.Getenv("STORAGE_URL"),
-		StorageUsername: os.Getenv("STORAGE_USERNAME"),
-		StoragePassword: os.Getenv("STORAGE_PASSWORD"),
-		MailHost:        os.Getenv("MAIL_HOST"),
-		MailAddress:     os.Getenv("MAIL_ADDRESS"),
-		MailPassword:    os.Getenv("MAIL_PASSWORD"),
+		MaxBalance: 100 * 100,
+
+		MailHost:     os.Getenv("MAIL_HOST"),
+		MailAddress:  os.Getenv("MAIL_ADDRESS"),
+		MailPassword: os.Getenv("MAIL_PASSWORD"),
+
+		S3Endpoint:  os.Getenv("S3_ENDPOINT"),
+		S3KeyID:     os.Getenv("S3_KEYID"),
+		S3AccessKey: os.Getenv("S3_ACCESSKEY"),
+		S3Bucket:    os.Getenv("S3_BUCKET"),
 	}
 }
