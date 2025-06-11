@@ -68,23 +68,29 @@ func (w *Worker) ServerSetup(job *types.Job) error {
 			return fmt.Errorf("backup not found: '%s'", *job.BackupID)
 		}
 
-		info, err := client.CreateRestoreJob(&mtui.CreateRestoreJob{
-			ID:       *job.BackupID,
-			Type:     mtui.RestoreJobTypeWEBDAV,
-			URL:      w.cfg.StorageURL,
-			Username: w.cfg.StorageUsername,
-			Password: w.cfg.StoragePassword,
-			Filename: fmt.Sprintf("%s.zip", *job.BackupID),
-			Key:      backup.Passphrase,
+		// go into maintenance mode
+		err = client.SetMaintenanceMode(true)
+		if err != nil {
+			return fmt.Errorf("could not enable maintenance mode: %v", err)
+		}
+
+		// create restore job
+		info, err := client.CreateBackupRestoreJob(&mtui.CreateBackupRestoreJob{
+			Type:      mtui.RestoreJob,
+			Endpoint:  w.cfg.S3Endpoint,
+			KeyID:     w.cfg.S3KeyID,
+			AccessKey: w.cfg.S3AccessKey,
+			Bucket:    w.cfg.S3Bucket,
+			FileKey:   backup.Passphrase,
+			Filename:  fmt.Sprintf("%s.zip", backup.ID),
 		})
 		if err != nil {
 			return fmt.Errorf("create restore job error: %v", err)
 		}
 
 		job.Message = info.Message
-		job.Data = []byte(info.ID)
 		job.Step = 2
-		job.NextRun = time.Now().Add(5 * time.Second).Unix()
+		job.NextRun = time.Now().Add(2 * time.Second).Unix()
 
 	case 2:
 		// get restore status
@@ -95,23 +101,23 @@ func (w *Worker) ServerSetup(job *types.Job) error {
 		}
 
 		// check restore job
-		info, err := client.GetRestoreJobInfo(string(job.Data))
+		info, err := client.GetBackupRestoreJobInfo()
 		if err != nil {
 			return fmt.Errorf("get restore job error: %v", err)
 		}
 
-		switch info.Status {
-		case mtui.RestoreJobRunning:
+		switch info.State {
+		case mtui.BackupRestoreJobRunning:
 			// still running
 			job.Message = info.Message
-			job.NextRun = time.Now().Add(5 * time.Second).Unix()
+			job.NextRun = time.Now().Add(2 * time.Second).Unix()
 
-		case mtui.RestoreJobSuccess:
+		case mtui.BackupRestoreJobSuccess:
 			// all done
 			job.Message = info.Message
 			job.Step = 3
 
-		case mtui.RestoreJobFailure:
+		case mtui.BackupRestoreJobFailure:
 			// restore failed
 			job.Message = info.Message
 			job.State = types.JobStateDoneFailure
