@@ -5,8 +5,10 @@ services:
   image: ghcr.io/minetest-go/mtui:{{.Server.UIVersion}}
   stop_grace_period: 1m
   networks:
-   - terminator
-   - network-{{.ServerShortID}}
+   terminator: {}
+   network-{{.ServerShortID}}:
+    aliases:
+      - mtui
   environment:
    COOKIE_DOMAIN: "{{.Hostname}}"
    COOKIE_PATH: "/ui/"
@@ -18,7 +20,6 @@ services:
    WORLD_DIR: "/root/.minetest/worlds/world"
    SERVER_NAME: "{{.Server.Name}}"
    INSTALL_MTUI_MOD: "true"
-   AUTORECONFIGURE_MODS: "true"
    ENABLE_FEATURES: "shell,luashell,minetest_config,docker,modmanagement,mediaserver,signup,chat,minetest_web"
    MINETEST_CONFIG: "/minetest.conf"
    GEOIP_API: "https://hosting.luanti.ch/api/geoip"
@@ -26,7 +27,8 @@ services:
    DOCKER_HOSTNAME: "ui-{{.ServerShortID}}"
    DOCKER_MINETEST_CONFIG: "{{.BaseDir}}/world/minetest.conf"
    DOCKER_MINETEST_PORT: "{{.Server.Port}}"
-   DOCKER_NETWORK: "network-{{.ServerShortID}},terminator"
+   DOCKER_NETWORK: "terminator"
+   DOCKER_INTERNAL_NETWORK: "network-{{.ServerShortID}}"
    DOCKER_WORLD_DIR: "{{.BaseDir}}/world"
    DOCKER_CONTAINER_PREFIX: "{{.ServerShortID}}"
    DOCKER_AUTOINSTALL_ENGINE: "true"
@@ -36,7 +38,6 @@ services:
    - "./world/minetest.conf:/minetest.conf"
    - "/var/run/docker.sock:/var/run/docker.sock:ro"
   labels:
-    - "promtail=true"
     - "traefik.enable=true"
     - "traefik.docker.network=terminator"
     - "traefik.http.services.{{.ServerShortID}}.loadbalancer.server.port=8080"
@@ -54,7 +55,6 @@ services:
    - network-{{.ServerShortID}}
   restart: always
   labels:
-    - "promtail=true"
     - "traefik.enable=true"
     - "traefik.docker.network=terminator"
     - "traefik.http.services.{{.ServerShortID}}-nginx.loadbalancer.server.port=80"
