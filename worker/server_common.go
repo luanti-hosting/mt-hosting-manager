@@ -91,12 +91,20 @@ func (w *Worker) removeServer(node *types.UserNode, server *types.MinetestServer
 			return fmt.Errorf("could not stop running service: %v", err)
 		}
 
+		// remove compose services
 		basedir := server_setup.GetBaseDir(server)
 		_, _, err = core.SSHExecute(client, fmt.Sprintf("cd %s && docker compose down -v", basedir))
 		if err != nil {
 			return fmt.Errorf("could not run docker compose down: %v", err)
 		}
 
+		// cleanup networks
+		_, _, err = core.SSHExecute(client, "docker network prune -f")
+		if err != nil {
+			return fmt.Errorf("could not cleanup networks: %v", err)
+		}
+
+		// remove data
 		_, _, err = core.SSHExecute(client, fmt.Sprintf("rm -rf %s", basedir))
 		if err != nil {
 			return fmt.Errorf("could not run remove data-dir '%s': %v", basedir, err)
