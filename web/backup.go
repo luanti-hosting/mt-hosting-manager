@@ -72,8 +72,15 @@ func (a *Api) CreateBackup(w http.ResponseWriter, r *http.Request, c *types.Clai
 }
 
 func (a *Api) GetBackups(w http.ResponseWriter, r *http.Request, c *types.Claims) {
-	list, err := a.repos.BackupRepo.GetByUserID(c.UserID)
-	Send(w, list, err)
+	if c.Role == types.UserRoleAdmin {
+		// return all
+		list, err := a.repos.BackupRepo.GetAll()
+		Send(w, list, err)
+	} else {
+		// return only the user's backups
+		list, err := a.repos.BackupRepo.GetByUserID(c.UserID)
+		Send(w, list, err)
+	}
 }
 
 func (a *Api) RemoveBackup(w http.ResponseWriter, r *http.Request, c *types.Claims) {

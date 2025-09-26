@@ -34,6 +34,10 @@ func (r *BackupRepository) GetByUserID(user_id string) ([]*types.Backup, error) 
 	return FindMulti[types.Backup](r.g.Where(types.Backup{UserID: user_id}))
 }
 
+func (r *BackupRepository) GetAll() ([]*types.Backup, error) {
+	return FindMulti[types.Backup](r.g.Where(types.Backup{}))
+}
+
 func (r *BackupRepository) Delete(id string) error {
 	return r.g.Delete(types.Backup{ID: id}).Error
 }
