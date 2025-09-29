@@ -3,7 +3,7 @@ module mt-hosting-manager
 go 1.24.2
 
 require (
-	github.com/dchest/captcha v1.0.0
+	github.com/dchest/captcha v1.1.0
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/golang-migrate/migrate/v4 v4.17.1
 	github.com/google/uuid v1.6.0
