@@ -13,7 +13,7 @@ export default {
     },
     template: /*html*/`
     <nav>
-        <ol class="breadcrumb bg-primary-subtle">
+        <ol class="breadcrumb bg-primary-subtle rounded p-2">
             <li class="breadcrumb-item" v-for="item in items">
                 <router-link :to="item.link">
                     <i v-bind:class="get_icon_class(item)" v-if="item.icon"></i>
