@@ -1,11 +1,14 @@
 import { logout, get_claims, is_logged_in, has_role } from '../service/login.js';
 import { get_stage } from '../service/info.js';
-import CurrencyDisplay from './CurrencyDisplay.js';
 import { get_balance } from '../service/user.js';
+
+import CurrencyDisplay from './CurrencyDisplay.js';
+import ThemeSwitcher from './ThemeSwitcher.js';
 
 export default {
 	components: {
-		"currency-display": CurrencyDisplay
+		"currency-display": CurrencyDisplay,
+		"theme-switcher": ThemeSwitcher
 	},
 	data: function() {
 		return {
@@ -121,6 +124,7 @@ export default {
 							<i class="fa-solid fa-right-from-bracket"></i>
 							Logout
 						</button>
+						<theme-switcher/>
 					</div>
 				</div>
 			</div>

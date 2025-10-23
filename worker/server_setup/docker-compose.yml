@@ -23,7 +23,6 @@ services:
    ENABLE_FEATURES: "shell,luashell,minetest_config,docker,modmanagement,mediaserver,signup,chat,minetest_web"
    MINETEST_CONFIG: "/minetest.conf"
    GEOIP_API: "https://hosting.luanti.ch/api/geoip"
-   DEFAULT_THEME: "flatly"
    DOCKER_HOSTNAME: "ui-{{.ServerShortID}}"
    DOCKER_MINETEST_CONFIG: "{{.BaseDir}}/world/minetest.conf"
    DOCKER_MINETEST_PORT: "{{.Server.Port}}"
