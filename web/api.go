@@ -120,6 +120,11 @@ func (api *Api) Setup() {
 	user_api.HandleFunc("/backup/{id}/download", api.Secure(api.DownloadBackup)).Methods(http.MethodGet)
 	user_api.HandleFunc("/backup/{id}/job", api.Secure(api.GetBackupJob)).Methods(http.MethodGet)
 
+	user_api.HandleFunc("/service/ticket", api.Secure(api.CreateTicket)).Methods(http.MethodPost)
+	user_api.HandleFunc("/service/message", api.Secure(api.CreateTicketMessage)).Methods(http.MethodPost)
+	user_api.HandleFunc("/service/ticket/search", api.Secure(api.SearchTickets)).Methods(http.MethodPost)
+	user_api.HandleFunc("/service/message/by-ticket/{ticket_id}", api.Secure(api.GetTicketMessages)).Methods(http.MethodGet)
+
 	// admin api
 	admin_api := apir.NewRoute().Subrouter()
 	admin_api.Use(SecureHandler(api.RoleCheck(types.UserRoleAdmin)))

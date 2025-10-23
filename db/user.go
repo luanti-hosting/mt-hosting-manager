@@ -2,6 +2,7 @@ package db
 
 import (
 	"mt-hosting-manager/types"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -14,6 +15,9 @@ type UserRepository struct {
 func (r *UserRepository) Insert(u *types.User) error {
 	if u.ID == "" {
 		u.ID = uuid.NewString()
+	}
+	if u.Created == 0 {
+		u.Created = time.Now().Unix()
 	}
 	return r.g.Create(u).Error
 }
