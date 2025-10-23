@@ -15,7 +15,7 @@ export default {
     <card-layout title="Service tickets" icon="ticket" :breadcrumb="breadcrumb">
         <router-link class="btn btn-sm btn-outline-success" :to="'/tickets/new'">
             <i class="fa fa-plus"></i>
-            Create service-ticket
+            Create ticket
         </router-link>
     </card-layout>
     `
