@@ -19,7 +19,7 @@ require (
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.11.1
 	github.com/vearutop/statigz v1.4.3
-	github.com/wneessen/go-mail v0.5.2
+	github.com/wneessen/go-mail v0.7.2
 	golang.org/x/crypto v0.42.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.25.12
