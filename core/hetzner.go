@@ -24,7 +24,11 @@ func (c *Core) CheckHetznerServerTypes() error {
 
 	for _, st := range available_server_types {
 		if st.Provider != types.ProviderHetzner {
-			continue
+			continue // not a hetzner type
+		}
+
+		if st.State != types.NodeTypeStateActive {
+			continue // not active
 		}
 
 		hst := server_type_map[st.ServerType]
