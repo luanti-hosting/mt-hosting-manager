@@ -30,6 +30,10 @@ export default {
 				<i class="fa fa-envelope"></i> Contact
 			</a>
 			&nbsp;
+			<a class="btn btn-secondary" href="https://forum.luanti.org/viewtopic.php?t=31291">
+				<i class="fa fa-link"></i> Luanti forum topic
+			</a>
+			&nbsp;
 			<a class="btn btn-secondary" href="https://discord.gg/Xj62fUbQkn" target="new">
 				<i class="fa-brands fa-discord"></i>
 				Join the discord server
