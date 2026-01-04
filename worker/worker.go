@@ -84,6 +84,9 @@ func (w *Worker) Run() {
 	// start collector job
 	go w.CollectJob()
 
+	// start server type job
+	go w.HetznerServerTypeCheckJob()
+
 	// start housekeeping job
 	go w.HousekeepingJob()
 
