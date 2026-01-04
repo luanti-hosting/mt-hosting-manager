@@ -70,6 +70,9 @@ jobs:
       run: |
         docker push ghcr.io/luanti-hosting/mt-hosting-manager:latest
 
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
     - name: Trigger deployment on hosting.luanti.ch
       if: success() && github.ref == 'refs/heads/master'
       uses: benc-uk/workflow-dispatch@v1.2.4
