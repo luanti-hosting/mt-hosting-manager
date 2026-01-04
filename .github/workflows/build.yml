@@ -72,6 +72,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
+    needs: test
     steps:
     - name: Trigger deployment on hosting.luanti.ch
       if: success() && github.ref == 'refs/heads/master'
