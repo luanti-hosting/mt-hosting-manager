@@ -22,7 +22,7 @@ require (
 	github.com/wneessen/go-mail v0.5.2
 	golang.org/x/crypto v0.42.0
 	gorm.io/driver/postgres v1.6.0
-	gorm.io/gorm v1.25.12
+	gorm.io/gorm v1.31.0
 )
 
 require (
