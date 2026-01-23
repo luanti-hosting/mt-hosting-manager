@@ -1,15 +1,17 @@
 package worker
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"mt-hosting-manager/api/hetzner_dns"
 	"mt-hosting-manager/core"
 	"mt-hosting-manager/notify"
 	"mt-hosting-manager/types"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/sirupsen/logrus"
 )
 
@@ -135,7 +137,11 @@ func (w *Worker) NodeDestroy(job *types.Job) error {
 		}
 
 		if node.ExternalID != "" {
-			err = w.hcc.DeleteServer(node.ExternalID)
+			server_id, err := strconv.ParseInt(node.ExternalID, 10, 32)
+			if err != nil {
+				return fmt.Errorf("could not parse server id: '%s'", node.ExternalID)
+			}
+			_, _, err = w.hc.Server.DeleteWithResult(context.Background(), &hcloud.Server{ID: server_id})
 			if err != nil {
 				logrus.WithFields(logrus.Fields{
 					"ExternalID": node.ExternalID,
@@ -149,8 +155,11 @@ func (w *Worker) NodeDestroy(job *types.Job) error {
 		}
 
 		if node.ExternalIPv4DNSID != "" {
-			err = w.hdc.DeleteRecord(node.ExternalIPv4DNSID)
-			if err != nil && err != hetzner_dns.ErrRecordNotFound {
+			_, _, err = w.hc.Zone.DeleteRRSet(context.Background(), &hcloud.ZoneRRSet{
+				Zone: &hcloud.Zone{Name: w.cfg.HetznerZoneName},
+				ID:   node.ExternalIPv4DNSID,
+			})
+			if err != nil {
 				return fmt.Errorf("could not remove A-record: %v", err)
 			}
 			node.ExternalIPv4DNSID = ""
@@ -161,8 +170,11 @@ func (w *Worker) NodeDestroy(job *types.Job) error {
 		}
 
 		if node.ExternalIPv6DNSID != "" {
-			err = w.hdc.DeleteRecord(node.ExternalIPv6DNSID)
-			if err != nil && err != hetzner_dns.ErrRecordNotFound {
+			_, _, err = w.hc.Zone.DeleteRRSet(context.Background(), &hcloud.ZoneRRSet{
+				Zone: &hcloud.Zone{Name: w.cfg.HetznerZoneName},
+				ID:   node.ExternalIPv6DNSID,
+			})
+			if err != nil {
 				return fmt.Errorf("could not remove AAAA-record: %v", err)
 			}
 			node.ExternalIPv6DNSID = ""
