@@ -3,8 +3,6 @@ package worker
 import (
 	"fmt"
 	"mt-hosting-manager/api/coinbase"
-	"mt-hosting-manager/api/hetzner_cloud"
-	"mt-hosting-manager/api/hetzner_dns"
 	"mt-hosting-manager/core"
 	"mt-hosting-manager/db"
 	"mt-hosting-manager/types"
@@ -12,6 +10,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
@@ -19,8 +18,7 @@ import (
 type Worker struct {
 	repos   *db.Repositories
 	cfg     *types.Config
-	hcc     *hetzner_cloud.HetznerCloudClient
-	hdc     *hetzner_dns.HetznerDNSClient
+	hc      *hcloud.Client
 	cbc     *coinbase.CoinbaseClient
 	running *atomic.Bool
 	core    *core.Core
@@ -35,8 +33,7 @@ func NewWorker(repos *db.Repositories, cfg *types.Config) *Worker {
 	return &Worker{
 		repos:   repos,
 		cfg:     cfg,
-		hcc:     hetzner_cloud.New(cfg.HetznerCloudKey),
-		hdc:     hetzner_dns.New(cfg.HetznerApiKey, cfg.HetznerApiZoneID),
+		hc:      hcloud.NewClient(hcloud.WithToken(cfg.HetznerCloudKey)),
 		cbc:     coinbase.New(cfg.CoinbaseKey),
 		running: &atomic.Bool{},
 		core:    core.New(repos, cfg),

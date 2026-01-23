@@ -1,10 +1,12 @@
 package core
 
 import (
+	"context"
 	"fmt"
-	"mt-hosting-manager/api/hetzner_dns"
 	"mt-hosting-manager/types"
 	"time"
+
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 type CreateServerResult struct {
@@ -18,7 +20,7 @@ type CreateServerResult struct {
 	ServerNameReserved    bool `json:"server_name_reserved"`
 }
 
-var hdns_records *hetzner_dns.RecordsResponse
+var hdns_records []*hcloud.ZoneRRSet
 var hdns_records_updated time.Time
 
 func (c *Core) ValidateCreateServer(server *types.MinetestServer, node *types.UserNode) (*CreateServerResult, error) {
@@ -60,7 +62,7 @@ func (c *Core) ValidateCreateServer(server *types.MinetestServer, node *types.Us
 
 	if time.Since(hdns_records_updated) > 5*time.Minute {
 		// fetch records
-		hdns_records, err = c.hdns.GetRecords()
+		hdns_records, _, err = c.hc.Zone.ListRRSets(context.Background(), &hcloud.Zone{Name: c.cfg.HetznerZoneName}, hcloud.ZoneRRSetListOpts{})
 		if err != nil {
 			return nil, fmt.Errorf("error in hetzner dns api: %v", err)
 		}
@@ -71,7 +73,7 @@ func (c *Core) ValidateCreateServer(server *types.MinetestServer, node *types.Us
 	record_name := fmt.Sprintf("%s%s", server.DNSName, c.cfg.DNSRecordSuffix)
 
 	// check if the name is already used within the zone
-	for _, existing_record := range hdns_records.Records {
+	for _, existing_record := range hdns_records {
 		if existing_record.Name == record_name {
 			csr.ServerNameAlreadyUsed = true
 			csr.Valid = false
