@@ -1,5 +1,6 @@
 import CardLayout from "../../layouts/CardLayout.js";
 import { ServiceTicketBreadcrumb } from "./ServiceTickets.js";
+import { create_ticket, create_message } from "../../../api/service_ticket.js";
 
 import format_size from "../../../util/format_size.js";
 import format_time from "../../../util/format_time.js";
@@ -34,20 +35,36 @@ export default {
     },
     methods: {
         format_size,
-        format_time
+        format_time,
+        create_ticket: async function() {
+            const ticket = await create_ticket({
+                title: this.title,
+                user_node_id: this.user_node_id,
+                minetest_server_id: this.minetest_server_id,
+                backup_id: this.backup_id
+            });
+            await create_message({
+                ticket_id: ticket.id,
+                message: this.message
+            });
+            this.$router.push(`/ticket/${ticket.id}`);
+        }
     },
     template: /*html*/`
     <card-layout title="New service ticket" icon="plus" :breadcrumb="breadcrumb">
 		<table class="table">
 			<tbody>
 				<tr>
-					<td>Title</td>
+					<td>
+                        Title
+                        <span class="badge bg-warning" v-if="!this.title">required</span>
+                    </td>
 					<td>
 						<input type="text" class="form-control" placeholder="Short summary of your issue" v-model="title"/>
 					</td>
 				</tr>
 				<tr>
-					<td>Node (optional)</td>
+					<td>Node</td>
 					<td>
 						<select v-model="user_node_id" class="form-control">
 							<option v-for="node in user_nodes" :value="node.id">{{node.alias}} ({{node.name}})</option>
@@ -55,7 +72,7 @@ export default {
 					</td>
 				</tr>
 				<tr>
-					<td>Server (optional)</td>
+					<td>Server</td>
 					<td>
 						<select v-model="minetest_server_id" class="form-control">
 							<option v-for="server in minetest_servers" :value="server.id">{{server.dns_name}}:{{server.port}}</option>
@@ -63,7 +80,7 @@ export default {
 					</td>
 				</tr>
 				<tr>
-					<td>Backup (optional)</td>
+					<td>Backup</td>
 					<td>
 						<select v-model="backup_id" class="form-control">
 							<option v-for="backup in backups" :value="backup.id">
@@ -73,14 +90,17 @@ export default {
 					</td>
 				</tr>
                 <tr>
-                    <td>Message</td>
                     <td>
-                        <textarea class="form-control" style="height: 250px;" placeholder="Describe your issue here"></textarea>
+                        Message
+                        <span class="badge bg-warning" v-if="!this.message">required</span>
+                    </td>
+                    <td>
+                        <textarea class="form-control" style="height: 250px;" placeholder="Describe your issue here" v-model="message"></textarea>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2">
-                        <button class="btn btn-primary w-100">
+                        <button class="btn btn-primary w-100" :disabled="!this.title || !this.message" v-on:click="create_ticket">
                             <i class="fa fa-plus"></i>
                             Create ticket
                         </button>

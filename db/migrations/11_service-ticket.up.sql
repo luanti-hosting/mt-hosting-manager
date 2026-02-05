@@ -14,6 +14,7 @@ create table service_ticket(
 create table service_ticket_message(
     id varchar(36) primary key not null, -- uuid
     ticket_id varchar(36) not null references public.service_ticket(id) on delete cascade,
+    user_id varchar(36) not null references public.user(id) on delete cascade,
     timestamp bigint not null, -- in `time.Now().Unix()`
     message varchar not null
 );

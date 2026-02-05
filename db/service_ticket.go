@@ -22,6 +22,10 @@ func (r *ServiceTicketRepository) InsertTicket(n *types.ServiceTicket) error {
 	return r.g.Create(n).Error
 }
 
+func (r *ServiceTicketRepository) UpdateTicket(n *types.ServiceTicket) error {
+	return r.g.Model(n).Select("*").Updates(n).Error
+}
+
 func (r *ServiceTicketRepository) InsertMessage(n *types.ServiceTicketMessage) error {
 	if n.ID == "" {
 		n.ID = uuid.NewString()

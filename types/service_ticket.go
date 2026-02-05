@@ -5,7 +5,7 @@ type ServiceTicketState string
 const (
 	ServiceTicketOpen     ServiceTicketState = "OPEN"
 	ServiceTicketResolved ServiceTicketState = "RESOLVED"
-	ServiceTicketInvalid  ServiceTicketState = "INVALID"
+	ServiceTicketClosed   ServiceTicketState = "CLOSED"
 )
 
 type ServiceTicket struct {
@@ -36,6 +36,7 @@ type ServiceTicketSearch struct {
 type ServiceTicketMessage struct {
 	ID        string `json:"id" gorm:"primarykey;column:id"`
 	TicketID  string `json:"ticket_id" gorm:"column:ticket_id"`
+	UserID    string `json:"user_id" gorm:"column:user_id"`
 	Timestamp int64  `json:"timestamp" gorm:"column:timestamp"`
 	Message   string `json:"message" gorm:"column:message"`
 }

@@ -12,6 +12,11 @@ export const create_ticket = data => protected_fetch(`api/service/ticket`, {
     body: JSON.stringify(data)
 });
 
+export const update_ticket = data => protected_fetch(`api/service/ticket/${data.id}`, {
+    method: "POST",
+    body: JSON.stringify(data)
+});
+
 export const create_message = data => protected_fetch(`api/service/message`, {
     method: "POST",
     body: JSON.stringify(data)

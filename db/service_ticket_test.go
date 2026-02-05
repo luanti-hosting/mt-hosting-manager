@@ -31,6 +31,7 @@ func TestServiceTicket(t *testing.T) {
 	msg := &types.ServiceTicketMessage{
 		TicketID: ticket.ID,
 		Message:  "1234",
+		UserID:   user.ID,
 	}
 	assert.NoError(t, repos.ServiceTicketRepo.InsertMessage(msg))
 

@@ -25,6 +25,7 @@ import UserDetail from './components/pages/UserDetail.js';
 import Coupon from './components/pages/Coupon.js';
 import ServiceTickets from './components/pages/ticket/ServiceTickets.js';
 import NewTicket from './components/pages/ticket/NewTicket.js';
+import ServiceTicketDetail from './components/pages/ticket/ServiceTicketDetail.js';
 
 export default [{
 	path: "/", component: Start
@@ -98,6 +99,9 @@ export default [{
 	meta: { requiredRole: "ADMIN" }
 },{
 	path: "/tickets", component: ServiceTickets,
+	meta: { loggedIn: true }
+},{
+	path: "/ticket/:id", component: ServiceTicketDetail, props: true,
 	meta: { loggedIn: true }
 },{
 	path: "/tickets/new", component: NewTicket,
