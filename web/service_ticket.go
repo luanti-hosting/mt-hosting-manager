@@ -56,7 +56,7 @@ func (a *Api) UpdateTicket(w http.ResponseWriter, r *http.Request, c *types.Clai
 		return
 	}
 
-	if ticket.State != saved_ticket.State {
+	if ticket.State != saved_ticket.State && c.Role != types.UserRoleAdmin {
 		// State change, notify
 		click_url := fmt.Sprintf("%s#/ticket/%s", a.cfg.BaseURL, ticket.ID)
 		notify.Send(&notify.NtfyNotification{
@@ -97,14 +97,16 @@ func (a *Api) CreateTicketMessage(w http.ResponseWriter, r *http.Request, c *typ
 		return
 	}
 
-	click_url := fmt.Sprintf("%s#/ticket/%s", a.cfg.BaseURL, ticket.ID)
-	notify.Send(&notify.NtfyNotification{
-		Title:    fmt.Sprintf("Service ticket created: %s", ticket.ID),
-		Message:  fmt.Sprintf("Title: '%s' from user: %s", ticket.Title, ticket.UserID),
-		Click:    &click_url,
-		Priority: 4,
-		Tags:     []string{"ticket", "heavy_plus_sign"},
-	}, true)
+	if c.Role != types.UserRoleAdmin {
+		click_url := fmt.Sprintf("%s#/ticket/%s", a.cfg.BaseURL, ticket.ID)
+		notify.Send(&notify.NtfyNotification{
+			Title:    fmt.Sprintf("Service ticket updated: %s", ticket.ID),
+			Message:  fmt.Sprintf("Title: '%s' from user: %s, message: '%s'", ticket.Title, msg.UserID, msg.Message),
+			Click:    &click_url,
+			Priority: 4,
+			Tags:     []string{"ticket", "heavy_plus_sign"},
+		}, true)
+	}
 
 	msg.ID = uuid.NewString()
 	msg.Timestamp = time.Now().Unix()
