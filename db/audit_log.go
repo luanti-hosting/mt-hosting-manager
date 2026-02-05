@@ -52,7 +52,5 @@ func (r *AuditLogRepository) Search(s *types.AuditLogSearch) ([]*types.AuditLog,
 
 	q = q.Order("timestamp desc").Limit(1000)
 
-	var list []*types.AuditLog
-	err := q.Find(&list).Error
-	return list, err
+	return FindMulti[types.AuditLog](q)
 }

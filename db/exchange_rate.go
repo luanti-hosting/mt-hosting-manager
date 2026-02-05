@@ -19,18 +19,11 @@ func (r *ExchangeRateRepository) Update(n *types.ExchangeRate) error {
 }
 
 func (r *ExchangeRateRepository) GetAll() ([]*types.ExchangeRate, error) {
-	var list []*types.ExchangeRate
-	err := r.g.Where(types.ExchangeRate{}).Find(&list).Error
-	return list, err
+	return FindMulti[types.ExchangeRate](r.g.Where(types.ExchangeRate{}))
 }
 
 func (r *ExchangeRateRepository) GetByCurrency(currency string) (*types.ExchangeRate, error) {
-	var list []*types.ExchangeRate
-	err := r.g.Where(types.ExchangeRate{Currency: currency}).Limit(1).Find(&list).Error
-	if len(list) == 0 {
-		return nil, err
-	}
-	return list[0], err
+	return FindSingle[types.ExchangeRate](r.g.Where(types.ExchangeRate{Currency: currency}))
 }
 
 func (r *ExchangeRateRepository) DeleteByCurrency(currency string) error {
