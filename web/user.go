@@ -31,6 +31,16 @@ func (a *Api) GetUsers(w http.ResponseWriter, r *http.Request, c *types.Claims) 
 func (a *Api) GetUserByID(w http.ResponseWriter, r *http.Request, c *types.Claims) {
 	vars := mux.Vars(r)
 	user, err := a.repos.UserRepo.GetByID(vars["id"])
+
+	if c.Role != types.UserRoleAdmin {
+		// non-admin, return stripped-down object
+		user = &types.User{
+			ID:   user.ID,
+			Name: user.Name,
+			Role: user.Role,
+		}
+	}
+
 	Send(w, user, err)
 }
 

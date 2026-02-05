@@ -75,6 +75,11 @@ export default {
 							<i class="fa fa-map"></i> Overview
 						</router-link>
 					</li>
+					<li class="nav-item">
+						<router-link to="/tickets" class="nav-link" v-if="is_logged_in">
+							<i class="fa fa-ticket"></i> Service-Ticket
+						</router-link>
+					</li>
 					<li class="nav-item" v-if="has_role('ADMIN')">
 						<router-link to="/users" class="nav-link">
 							<i class="fa fa-users"></i> Users
