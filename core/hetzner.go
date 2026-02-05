@@ -1,19 +1,21 @@
 package core
 
 import (
+	"context"
 	"fmt"
-	"mt-hosting-manager/api/hetzner_cloud"
 	"mt-hosting-manager/types"
+
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 func (c *Core) CheckHetznerServerTypes() error {
-	server_types, err := c.hcloud.GetServerTypes()
+	server_types, err := c.hc.ServerType.All(context.Background())
 	if err != nil {
 		return fmt.Errorf("hcloud call error: %v", err)
 	}
 
-	server_type_map := map[string]*hetzner_cloud.ServerType{}
-	for _, st := range server_types.ServerTypes {
+	server_type_map := map[string]*hcloud.ServerType{}
+	for _, st := range server_types {
 		server_type_map[st.Name] = st
 	}
 
@@ -36,7 +38,7 @@ func (c *Core) CheckHetznerServerTypes() error {
 			return fmt.Errorf("server not found in hetzner list: '%s'", st.ServerType)
 		}
 
-		if hst.Deprecated {
+		if hst.IsDeprecated() {
 			return fmt.Errorf("Server-type deprecated: '%s'", st.ServerType)
 		}
 	}
