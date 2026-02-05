@@ -54,6 +54,19 @@ type CreateServerResponse struct {
 	Server *ServerInfo `json:"server"`
 }
 
+type ServerTypesResponse struct {
+	ServerTypes []*ServerType `json:"server_types"`
+}
+
+type ServerType struct {
+	ID         int    `json:"id"`
+	Name       string `json:"name"`
+	Cores      int    `json:"cores"`
+	Memory     int    `json:"memory"`
+	Disk       int    `json:"disk"`
+	Deprecated bool   `json:"deprecated"`
+}
+
 type TimeSeriesData struct {
 	Values map[string][2]float64 `json:"values"`
 }
