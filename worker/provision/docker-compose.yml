@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
  exporter:
-  image: prom/node-exporter:v1.6.1
+  image: prom/node-exporter:{{.UserNode.NodeExporterVersion}}
   restart: always
   volumes:
     - /proc:/host/proc:ro
@@ -17,7 +17,7 @@ services:
   network_mode: "host"
 
  traefik:
-  image: traefik:v3.1
+  image: traefik:{{.UserNode.TraefikVersion}}
   restart: always
   depends_on:
    - ipv6nat
@@ -58,7 +58,7 @@ services:
     max-size: 50m
 
  ipv6nat:
-  image: robbertkl/ipv6nat:0.4.4
+  image: robbertkl/ipv6nat:{{.UserNode.IPv6NatVersion}}
   restart: always
   network_mode: host
   cap_drop:

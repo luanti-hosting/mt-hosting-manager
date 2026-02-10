@@ -42,6 +42,7 @@ type MinetestServer struct {
 	CustomDNS          string              `json:"custom_dns_name" gorm:"column:custom_dns_name"`
 	Port               int                 `json:"port" gorm:"column:port"`
 	UIVersion          string              `json:"ui_version" gorm:"column:ui_version"`
+	NginxVersion       string              `json:"nginx_version" gorm:"column:nginx_version"`
 	JWTKey             string              `json:"jwt_key" gorm:"column:jwt_key"`
 	Created            int64               `json:"created" gorm:"column:created"`
 	State              MinetestServerState `json:"state" gorm:"column:state"`
