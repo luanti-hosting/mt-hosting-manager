@@ -27,30 +27,15 @@ func (r *UserRepository) Update(u *types.User) error {
 }
 
 func (r *UserRepository) GetByID(id string) (*types.User, error) {
-	var list []*types.User
-	err := r.g.Where(types.User{ID: id}).Limit(1).Find(&list).Error
-	if len(list) == 0 {
-		return nil, err
-	}
-	return list[0], err
+	return FindSingle[types.User](r.g.Where(types.User{ID: id}))
 }
 
 func (r *UserRepository) GetByName(name string) (*types.User, error) {
-	var list []*types.User
-	err := r.g.Where(types.User{Name: name}).Limit(1).Find(&list).Error
-	if len(list) == 0 {
-		return nil, err
-	}
-	return list[0], err
+	return FindSingle[types.User](r.g.Where(types.User{Name: name}))
 }
 
 func (r *UserRepository) GetByTypeAndExternalID(t types.UserType, external_id string) (*types.User, error) {
-	var list []*types.User
-	err := r.g.Where(types.User{Type: t, ExternalID: external_id}).Limit(1).Find(&list).Error
-	if len(list) == 0 {
-		return nil, err
-	}
-	return list[0], err
+	return FindSingle[types.User](r.g.Where(types.User{Type: t, ExternalID: external_id}))
 }
 
 func (r *UserRepository) GetAllByRole(role types.UserRole) ([]*types.User, error) {
@@ -99,7 +84,5 @@ func (r *UserRepository) Search(s *types.UserSearch) ([]*types.User, error) {
 		q = q.Limit(100)
 	}
 
-	var list []*types.User
-	err := q.Order("lastlogin DESC").Find(&list).Error
-	return list, err
+	return FindMulti[types.User](q.Order("lastlogin DESC"))
 }

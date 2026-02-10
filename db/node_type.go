@@ -23,24 +23,15 @@ func (r *NodeTypeRepository) Update(n *types.NodeType) error {
 }
 
 func (r *NodeTypeRepository) GetByID(id string) (*types.NodeType, error) {
-	var list []*types.NodeType
-	err := r.g.Where(types.NodeType{ID: id}).Limit(1).Find(&list).Error
-	if len(list) == 0 {
-		return nil, err
-	}
-	return list[0], err
+	return FindSingle[types.NodeType](r.g.Where(types.NodeType{ID: id}))
 }
 
 func (r *NodeTypeRepository) GetByState(t types.NodeTypeState) ([]*types.NodeType, error) {
-	var list []*types.NodeType
-	err := r.g.Where(types.NodeType{State: t}).Find(&list).Error
-	return list, err
+	return FindMulti[types.NodeType](r.g.Where(types.NodeType{State: t}))
 }
 
 func (r *NodeTypeRepository) GetAll() ([]*types.NodeType, error) {
-	var list []*types.NodeType
-	err := r.g.Where(types.NodeType{}).Order("order_id ASC").Find(&list).Error
-	return list, err
+	return FindMulti[types.NodeType](r.g.Where(types.NodeType{}).Order("order_id ASC"))
 }
 
 func (r *NodeTypeRepository) Delete(node_type_id string) error {
