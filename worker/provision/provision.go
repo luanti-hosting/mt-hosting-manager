@@ -59,9 +59,18 @@ func Provision(client *ssh.Client, cfg *types.Config, userID string) error {
 		return fmt.Errorf("could not write file: %v", err)
 	}
 
-	_, stderr, err := core.SSHExecute(client, "/provision/setup.sh")
-	if err != nil {
-		return fmt.Errorf("SSHExecute error: %v, stderr: '%s'", err, string(stderr))
+	retries := 0
+	for {
+		_, stderr, err := core.SSHExecute(client, "/provision/setup.sh")
+		if err != nil {
+			if retries > 3 {
+				return fmt.Errorf("SSHExecute error: %v, stderr: '%s'", err, string(stderr))
+			} else {
+				retries++
+				continue
+			}
+		}
+		break
 	}
 
 	return nil
