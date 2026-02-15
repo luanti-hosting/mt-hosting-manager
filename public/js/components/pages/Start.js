@@ -47,9 +47,9 @@ export default {
 				<i class="fa-brands fa-github"></i> Powered by mtui
 			</a>
 			&nbsp;
-			<router-link class="btn btn btn-outline-success" :to="'/mtservers/create'" v-if="is_logged_in">
+			<router-link class="btn btn btn-outline-success" :to="'/nodes/create'" v-if="is_logged_in">
 				<i class="fa fa-plus"></i>
-				Create server
+				Create node
 			</router-link>
 		</div>
 	</card-layout>
