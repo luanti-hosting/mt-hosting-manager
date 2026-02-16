@@ -141,7 +141,11 @@ export default {
 						</help-popup>
 					</td>
 					<td>
-						<input type="text" placeholder="Custom DNS Name" class="form-control" v-model="server.custom_dns_name"/>
+						<input type="text" placeholder="Custom DNS name" class="form-control" v-model="server.custom_dns_name"/>
+						<div class="alert alert-error" v-if="false">
+							<i class="fa-solid fa-triangle-exclamation"></i>
+							This doesn't look like a real DNS name, please recheck and either leave it empty or enter a valid DNS name
+						</div>
 					</td>					
 				</tr>
 				<tr v-if="server.state == 'RUNNING' && has_role('ADMIN')">

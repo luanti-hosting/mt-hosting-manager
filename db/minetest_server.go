@@ -19,7 +19,7 @@ func (r *MinetestServerRepository) Insert(n *types.MinetestServer) error {
 }
 
 func (r *MinetestServerRepository) Update(n *types.MinetestServer) error {
-	return r.g.Model(n).Updates(n).Error
+	return r.g.Model(n).Select("*").Updates(n).Error
 }
 
 func (r *MinetestServerRepository) GetByID(id string) (*types.MinetestServer, error) {
