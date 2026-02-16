@@ -2,16 +2,23 @@ import CardLayout from "../../layouts/CardLayout.js";
 import { ServiceTicketBreadcrumb } from "./ServiceTickets.js";
 import { create_ticket, create_message } from "../../../api/service_ticket.js";
 
+import UserSearch from "../../UserSearch.js";
+import UserLink from "../../UserLink.js";
+
 import format_size from "../../../util/format_size.js";
 import format_time from "../../../util/format_time.js";
 
 import { get_all as get_all_nodes } from "../../../api/node.js";
 import { get_all as get_all_servers } from "../../../api/mtserver.js";
 import { get_all as get_all_backups } from "../../../api/backup.js";
+import { has_role } from "../../../service/login.js";
+import { fetch_tickets } from "../../../service/service_ticket.js";
 
 export default {
     components: {
-        "card-layout": CardLayout
+        "card-layout": CardLayout,
+        "user-search": UserSearch,
+        "user-link": UserLink
     },
     data: function() {
         return {
@@ -24,6 +31,7 @@ export default {
             minetest_server_id: null,
             backups: [],
             backup_id: null,
+            create_user: null,
             title: "",
             message: ""
         };
@@ -36,9 +44,11 @@ export default {
     methods: {
         format_size,
         format_time,
+        has_role,
         create_ticket: async function() {
             const ticket = await create_ticket({
                 title: this.title,
+                user_id: this.create_user ? this.create_user.id : null,
                 user_node_id: this.user_node_id,
                 minetest_server_id: this.minetest_server_id,
                 backup_id: this.backup_id
@@ -47,6 +57,7 @@ export default {
                 ticket_id: ticket.id,
                 message: this.message
             });
+            await fetch_tickets();
             this.$router.push(`/ticket/${ticket.id}`);
         }
     },
@@ -54,6 +65,12 @@ export default {
     <card-layout title="New service ticket" icon="plus" :breadcrumb="breadcrumb">
 		<table class="table">
 			<tbody>
+                <tr v-if="has_role('ADMIN')">
+                    <td>User</td>
+                    <td>
+                        <user-search v-model="create_user"/>
+                    </td>
+                </tr>
 				<tr>
 					<td>
                         Title

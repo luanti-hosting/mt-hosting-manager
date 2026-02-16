@@ -19,7 +19,9 @@ func (a *Api) CreateTicket(w http.ResponseWriter, r *http.Request, c *types.Clai
 		SendError(w, http.StatusInternalServerError, fmt.Errorf("json decode error: %v", err))
 		return
 	}
-	ticket.UserID = c.UserID
+	if c.Role != types.UserRoleAdmin || ticket.UserID == "" {
+		ticket.UserID = c.UserID
+	}
 	ticket.ID = uuid.NewString()
 	ticket.Created = time.Now().Unix()
 	ticket.State = types.ServiceTicketOpen

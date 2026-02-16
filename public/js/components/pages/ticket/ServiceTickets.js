@@ -1,27 +1,33 @@
 import CardLayout from "../../layouts/CardLayout.js";
 import TicketStateBadge from "./TicketStateBadge.js";
+import UserLink from "../../UserLink.js";
 
-import { search_tickets } from "../../../api/service_ticket.js";
+import { get_all_tickets, fetch_tickets } from "../../../service/service_ticket.js";
 import format_time from "../../../util/format_time.js";
+import { has_role } from "../../../service/login.js";
 
 export const ServiceTicketBreadcrumb = {icon: "ticket", name: "Service tickets", link: "/tickets"};
 
 export default {
     components: {
         "card-layout": CardLayout,
-        "ticket-state-badge": TicketStateBadge
+        "ticket-state-badge": TicketStateBadge,
+        "user-link": UserLink
     },
     data: function() {
         return {
-            breadcrumb: [ServiceTicketBreadcrumb],
-            tickets: []
+            breadcrumb: [ServiceTicketBreadcrumb]
         };
     },
     methods: {
-        format_time
+        format_time,
+        has_role
+    },
+    computed: {
+        tickets: get_all_tickets
     },
     mounted: async function() {
-        this.tickets = await search_tickets({});
+        await fetch_tickets();
     },
     template: /*html*/`
     <card-layout title="Service tickets" icon="ticket" :breadcrumb="breadcrumb">
@@ -38,6 +44,7 @@ export default {
             <thead>
                 <tr>
                     <th>State</th>
+                    <th v-if="has_role('ADMIN')">User</th>
                     <th>Created</th>
                     <th style="width: 50%;">Title</th>
                 </tr>
@@ -46,6 +53,9 @@ export default {
                 <tr v-for="ticket in tickets" :key="ticket.id">
                     <td>
                         <ticket-state-badge :state="ticket.state"/>
+                    </td>
+                    <td v-if="has_role('ADMIN')">
+                        <user-link :id="ticket.user_id"/>
                     </td>
                     <td>
                         {{ format_time(ticket.created) }}

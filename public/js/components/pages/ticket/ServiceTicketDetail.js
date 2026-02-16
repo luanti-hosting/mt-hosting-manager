@@ -3,6 +3,7 @@ import TicketStateBadge from "./TicketStateBadge.js";
 
 import format_time from "../../../util/format_time.js";
 import { search_tickets, get_messages, create_message, update_ticket } from "../../../api/service_ticket.js";
+import { fetch_tickets } from "../../../service/service_ticket.js";
 import { get_cached_user } from "../../../service/user_cache.js";
 
 export const ServiceTicketBreadcrumb = {icon: "ticket", name: "Service tickets", link: "/tickets"};
@@ -39,14 +40,17 @@ export default {
         mark_resolved: async function(){
             this.ticket.state = "RESOLVED";
             await update_ticket(this.ticket);
+            await fetch_tickets();
         },
         close: async function() {
             this.ticket.state = "CLOSED";
             await update_ticket(this.ticket);
+            await fetch_tickets();
         },
         reopen: async function() {
             this.ticket.state = "OPEN";
             await update_ticket(this.ticket);
+            await fetch_tickets();
         }
     },
     mounted: async function() {

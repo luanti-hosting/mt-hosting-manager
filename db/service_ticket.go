@@ -40,22 +40,22 @@ func (r *ServiceTicketRepository) SearchTickets(search *types.ServiceTicketSearc
 	g := r.g.Model(types.ServiceTicket{})
 
 	if search.TicketID != nil {
-		g = r.g.Where(types.ServiceTicket{ID: *search.TicketID})
+		g = g.Where(types.ServiceTicket{ID: *search.TicketID})
 	}
 	if search.UserID != nil {
-		g = r.g.Where(types.ServiceTicket{UserID: *search.UserID})
+		g = g.Where(types.ServiceTicket{UserID: *search.UserID})
 	}
 	if search.UserNodeID != nil {
-		g = r.g.Where(types.ServiceTicket{UserNodeID: search.UserNodeID})
+		g = g.Where(types.ServiceTicket{UserNodeID: search.UserNodeID})
 	}
 	if search.MinetestServerID != nil {
-		g = r.g.Where(types.ServiceTicket{MinetestServerID: search.MinetestServerID})
+		g = g.Where(types.ServiceTicket{MinetestServerID: search.MinetestServerID})
 	}
 	if search.BackupID != nil {
-		g = r.g.Where(types.ServiceTicket{BackupID: search.BackupID})
+		g = g.Where(types.ServiceTicket{BackupID: search.BackupID})
 	}
 	if search.State != nil {
-		g = r.g.Where(types.ServiceTicket{State: *search.State})
+		g = g.Where(types.ServiceTicket{State: *search.State})
 	}
 
 	g = g.Order("created desc")

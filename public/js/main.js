@@ -1,8 +1,11 @@
 import App from './app.js';
 import routes from './routes.js';
+
 import { check_login } from './service/login.js';
 import { fetch_info } from './service/info.js';
 import { load_exchange_rates } from './service/exchange_rate.js';
+import { fetch_tickets } from './service/service_ticket.js';
+
 import router_guards from './util/router_guards.js';
 import events, { EVENT_STARTUP } from './events.js';
 import { fetch_nodetypes } from './service/nodetype.js';
@@ -10,7 +13,7 @@ import "./service/user.js";
 
 async function start(){
 	await fetch_info();
-	await Promise.all([check_login(), fetch_nodetypes(), load_exchange_rates()]);
+	await Promise.all([check_login(), fetch_nodetypes(), load_exchange_rates(), fetch_tickets()]);
 
 	// create router instance
 	const router = VueRouter.createRouter({
