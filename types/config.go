@@ -29,9 +29,9 @@ type Config struct {
 	CookiePath   string
 	CookieSecure bool
 
-	HetznerCloudKey  string
-	HetznerApiKey    string
-	HetznerApiZoneID string
+	HetznerCloudKey string
+	HetznerZoneName string
+	HetznerSSHKeys  []string
 
 	CoinbaseKey     string
 	CoinbaseEnabled bool
@@ -83,9 +83,9 @@ func NewConfig() *Config {
 		CookiePath:       os.Getenv("COOKIE_PATH"),
 		CookieSecure:     os.Getenv("COOKIE_SECURE") == "true",
 		// hetzner
-		HetznerCloudKey:  os.Getenv("HETZNER_CLOUD_KEY"),
-		HetznerApiKey:    os.Getenv("HETZNER_API_KEY"),
-		HetznerApiZoneID: os.Getenv("HETZNER_API_ZONEID"),
+		HetznerCloudKey: os.Getenv("HETZNER_CLOUD_KEY"),
+		HetznerZoneName: os.Getenv("HETZNER_ZONE_NAME"),
+		HetznerSSHKeys:  strings.Split(os.Getenv("HETZNER_SSH_KEYS"), ","),
 		// coinbase
 		CoinbaseKey:     os.Getenv("COINBASE_KEY"),
 		CoinbaseEnabled: os.Getenv("COINBASE_ENABLED") == "true",

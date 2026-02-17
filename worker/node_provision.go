@@ -1,15 +1,15 @@
 package worker
 
 import (
+	"context"
 	"fmt"
-	"mt-hosting-manager/api/hetzner_cloud"
-	"mt-hosting-manager/api/hetzner_dns"
 	"mt-hosting-manager/core"
 	"mt-hosting-manager/types"
 	"mt-hosting-manager/worker/provision"
 	"strings"
 	"time"
 
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 	"github.com/sirupsen/logrus"
 )
 
@@ -54,23 +54,32 @@ func (w *Worker) NodeProvision(job *types.Job) error {
 			job.Message = "creating new server"
 			job.ProgressPercent = 10
 
-			csr := &hetzner_cloud.CreateServerRequest{
-				Image: "ubuntu-22.04",
+			keys := []*hcloud.SSHKey{}
+			// TODO: configurable via env vars
+			for _, keyname := range w.cfg.HetznerSSHKeys {
+				key, _, err := w.hc.SSHKey.GetByName(context.Background(), keyname)
+				if err != nil {
+					return fmt.Errorf("could not get key by name: '%s': %v", keyname, err)
+				}
+				keys = append(keys, key)
+			}
+
+			resp, _, err := w.hc.Server.Create(context.Background(), hcloud.ServerCreateOpts{
+				Image: &hcloud.Image{Name: "ubuntu-24.04"},
 				Labels: map[string]string{
 					"node_id": node.ID,
 					"stage":   w.cfg.Stage,
 				},
-				Location: node.Location,
+				Location: &hcloud.Location{Name: node.Location},
 				Name:     node.Name,
-				PublicNet: &hetzner_cloud.PublicNet{
+				PublicNet: &hcloud.ServerCreatePublicNet{
 					EnableIPv4: true,
 					EnableIPv6: true,
 				},
-				ServerType:       nodetype.ServerType,
-				SSHKeys:          []string{"minetest@keymaster", "thomas@keymaster"},
-				StartAfterCreate: true,
-			}
-			resp, err := w.hcc.CreateServer(csr)
+				ServerType:       &hcloud.ServerType{Name: nodetype.ServerType},
+				SSHKeys:          keys,
+				StartAfterCreate: hcloud.Ptr(true),
+			})
 			if err != nil {
 				return fmt.Errorf("create server failed: %v", err)
 			}
@@ -80,10 +89,10 @@ func (w *Worker) NodeProvision(job *types.Job) error {
 			}).Info("Server created")
 
 			node.ExternalID = fmt.Sprintf("%d", resp.Server.ID)
-			node.IPv4 = resp.Server.PublicNet.IPv4.IP
+			node.IPv4 = resp.Server.PublicNet.IPv4.IP.String()
 
 			// replace trailing /64 with 1
-			ipv6_parts := strings.Split(resp.Server.PublicNet.IPv6.IP, "/")
+			ipv6_parts := strings.Split(resp.Server.PublicNet.IPv6.IP.String(), "/")
 			node.IPv6 = fmt.Sprintf("%s1", ipv6_parts[0])
 			err = w.repos.UserNodeRepo.Update(node)
 			if err != nil {
@@ -98,7 +107,7 @@ func (w *Worker) NodeProvision(job *types.Job) error {
 			job.ProgressPercent = 20
 
 			record_name := fmt.Sprintf("%s%s", node.Name, w.cfg.DNSRecordSuffix)
-			record, err := w.CreateDNSRecord(hetzner_dns.RecordA, record_name, node.IPv4)
+			record, err := w.CreateOrUpdateDNSRecord(hcloud.ZoneRRSetTypeA, record_name, node.IPv4)
 			if err != nil {
 				return fmt.Errorf("could not create A-record: %v", err)
 			}
@@ -116,7 +125,7 @@ func (w *Worker) NodeProvision(job *types.Job) error {
 			job.ProgressPercent = 30
 
 			record_name := fmt.Sprintf("%s%s", node.Name, w.cfg.DNSRecordSuffix)
-			record, err := w.CreateDNSRecord(hetzner_dns.RecordAAAA, record_name, node.IPv6)
+			record, err := w.CreateOrUpdateDNSRecord(hcloud.ZoneRRSetTypeAAAA, record_name, node.IPv6)
 			if err != nil {
 				return fmt.Errorf("could not create AAAA-record: %v", err)
 			}

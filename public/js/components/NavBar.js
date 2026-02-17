@@ -103,7 +103,7 @@ export default {
 						</router-link>
 					</li>
 					<li class="nav-item">
-						<router-link to="/backup" class="nav-link">
+						<router-link to="/backup" class="nav-link" v-if="is_logged_in">
 							<i class="fa fa-object-group"></i> Backups
 						</router-link>
 					</li>

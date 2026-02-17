@@ -1,12 +1,14 @@
 package worker
 
 import (
+	"context"
 	"fmt"
-	"mt-hosting-manager/api/hetzner_dns"
 	"mt-hosting-manager/core"
 	"mt-hosting-manager/types"
 	"mt-hosting-manager/worker/server_setup"
 	"time"
+
+	"github.com/hetznercloud/hcloud-go/v2/hcloud"
 )
 
 func (w *Worker) serverPrepareSetup(node *types.UserNode, server *types.MinetestServer) error {
@@ -17,29 +19,49 @@ func (w *Worker) serverPrepareSetup(node *types.UserNode, server *types.Minetest
 		return fmt.Errorf("server entity update error: %v", err)
 	}
 
+	zone, _, err := w.hc.Zone.GetByName(context.Background(), w.cfg.HetznerZoneName)
+	if err != nil {
+		return fmt.Errorf("could not get zone '%s': %v", w.cfg.HetznerZoneName, err)
+	}
+
 	record_name := fmt.Sprintf("%s%s", server.DNSName, w.cfg.DNSRecordSuffix)
 	record_value := fmt.Sprintf("%s%s", node.Name, w.cfg.DNSRecordSuffix)
 	if server.ExternalCNAMEDNSID == "" {
 		// create new record
-		record, err := w.CreateDNSRecord(hetzner_dns.RecordCNAME, record_name, record_value)
+		record, _, err := w.hc.Zone.CreateRRSet(context.Background(), zone, hcloud.ZoneRRSetCreateOpts{
+			Name: record_name,
+			Type: hcloud.ZoneRRSetTypeCNAME,
+			TTL:  hcloud.Ptr(300),
+			Records: []hcloud.ZoneRRSetRecord{
+				{Value: record_value},
+			},
+		})
 		if err != nil {
 			return fmt.Errorf("could not create CNAME record: %v", err)
 		}
-		server.ExternalCNAMEDNSID = record.ID
+		server.ExternalCNAMEDNSID = record.RRSet.ID
 
 	} else {
 		// check if record matches config
-		record, err := w.hdc.GetRecord(server.ExternalCNAMEDNSID)
+		rrset, _, err := w.hc.Zone.GetRRSetByID(context.Background(), zone, server.ExternalCNAMEDNSID)
 		if err != nil {
 			return fmt.Errorf("could not fetch current cname with id: '%s': %v", server.ExternalCNAMEDNSID, err)
 		}
-		if record.Record.Name != record_name || record.Record.Value != record_value {
+		if len(rrset.Records) != 1 {
+			return fmt.Errorf("invalid rrset record length: %d", len(rrset.Records))
+		}
+		record := rrset.Records[0]
+
+		if rrset.Name != record_name || record.Value != record_value {
 			// values changed, remove and recreate
-			err = w.hdc.DeleteRecord(server.ExternalCNAMEDNSID)
+			_, _, err = w.hc.Zone.DeleteRRSet(context.Background(), &hcloud.ZoneRRSet{
+				Zone: zone,
+				ID:   server.ExternalCNAMEDNSID,
+			})
 			if err != nil {
 				return fmt.Errorf("could not remove record with id '%s', %v", server.ExternalCNAMEDNSID, err)
 			}
-			created_record, err := w.CreateDNSRecord(hetzner_dns.RecordCNAME, record_name, record_value)
+			created_record, err := w.CreateOrUpdateDNSRecord(hcloud.ZoneRRSetTypeCNAME, record_name, record_value)
 			if err != nil {
 				return fmt.Errorf("could not re-create CNAME record: %v", err)
 			}
@@ -67,8 +89,16 @@ func (w *Worker) removeServer(node *types.UserNode, server *types.MinetestServer
 		return fmt.Errorf("server entity update error: %v", err)
 	}
 
+	zone, _, err := w.hc.Zone.GetByName(context.Background(), w.cfg.HetznerZoneName)
+	if err != nil {
+		return fmt.Errorf("could not get zone '%s': %v", w.cfg.HetznerZoneName, err)
+	}
+
 	if server.ExternalCNAMEDNSID != "" {
-		err = w.hdc.DeleteRecord(server.ExternalCNAMEDNSID)
+		_, _, err = w.hc.Zone.DeleteRRSet(context.Background(), &hcloud.ZoneRRSet{
+			Zone: zone,
+			ID:   server.ExternalCNAMEDNSID,
+		})
 		if err != nil {
 			return fmt.Errorf("could not remove cname (id: %s) of server %s: %v", server.ExternalCNAMEDNSID, server.DNSName, err)
 		}
