@@ -56,7 +56,7 @@ func (w *Worker) NodeProvision(job *types.Job) error {
 
 			keys := []*hcloud.SSHKey{}
 			// TODO: configurable via env vars
-			for _, keyname := range []string{"minetest@keymaster", "thomas@keymaster"} {
+			for _, keyname := range w.cfg.HetznerSSHKeys {
 				key, _, err := w.hc.SSHKey.GetByName(context.Background(), keyname)
 				if err != nil {
 					return fmt.Errorf("could not get key by name: '%s': %v", keyname, err)

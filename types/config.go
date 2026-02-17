@@ -31,6 +31,7 @@ type Config struct {
 
 	HetznerCloudKey string
 	HetznerZoneName string
+	HetznerSSHKeys  []string
 
 	CoinbaseKey     string
 	CoinbaseEnabled bool
@@ -84,6 +85,7 @@ func NewConfig() *Config {
 		// hetzner
 		HetznerCloudKey: os.Getenv("HETZNER_CLOUD_KEY"),
 		HetznerZoneName: os.Getenv("HETZNER_ZONE_NAME"),
+		HetznerSSHKeys:  strings.Split(os.Getenv("HETZNER_SSH_KEYS"), ","),
 		// coinbase
 		CoinbaseKey:     os.Getenv("COINBASE_KEY"),
 		CoinbaseEnabled: os.Getenv("COINBASE_ENABLED") == "true",
