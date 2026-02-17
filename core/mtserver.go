@@ -61,8 +61,13 @@ func (c *Core) ValidateCreateServer(server *types.MinetestServer, node *types.Us
 	}
 
 	if time.Since(hdns_records_updated) > 5*time.Minute {
+		zone, _, err := c.hc.Zone.GetByName(context.Background(), c.cfg.HetznerZoneName)
+		if err != nil {
+			return nil, fmt.Errorf("could not get zone '%s': %v", c.cfg.HetznerZoneName, err)
+		}
+
 		// fetch records
-		hdns_records, _, err = c.hc.Zone.ListRRSets(context.Background(), &hcloud.Zone{Name: c.cfg.HetznerZoneName}, hcloud.ZoneRRSetListOpts{})
+		hdns_records, _, err = c.hc.Zone.ListRRSets(context.Background(), zone, hcloud.ZoneRRSetListOpts{})
 		if err != nil {
 			return nil, fmt.Errorf("error in hetzner dns api: %v", err)
 		}

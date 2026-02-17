@@ -54,8 +54,18 @@ func (w *Worker) NodeProvision(job *types.Job) error {
 			job.Message = "creating new server"
 			job.ProgressPercent = 10
 
+			keys := []*hcloud.SSHKey{}
+			// TODO: configurable via env vars
+			for _, keyname := range []string{"minetest@keymaster", "thomas@keymaster"} {
+				key, _, err := w.hc.SSHKey.GetByName(context.Background(), keyname)
+				if err != nil {
+					return fmt.Errorf("could not get key by name: '%s': %v", keyname, err)
+				}
+				keys = append(keys, key)
+			}
+
 			resp, _, err := w.hc.Server.Create(context.Background(), hcloud.ServerCreateOpts{
-				Image: &hcloud.Image{Name: "ubuntu-22.04"},
+				Image: &hcloud.Image{Name: "ubuntu-24.04"},
 				Labels: map[string]string{
 					"node_id": node.ID,
 					"stage":   w.cfg.Stage,
@@ -66,14 +76,8 @@ func (w *Worker) NodeProvision(job *types.Job) error {
 					EnableIPv4: true,
 					EnableIPv6: true,
 				},
-				ServerType: &hcloud.ServerType{Name: nodetype.ServerType},
-				SSHKeys: []*hcloud.SSHKey{
-					{
-						Name: "minetest@keymaster",
-					}, {
-						Name: "thomas@keymaster",
-					},
-				},
+				ServerType:       &hcloud.ServerType{Name: nodetype.ServerType},
+				SSHKeys:          keys,
 				StartAfterCreate: hcloud.Ptr(true),
 			})
 			if err != nil {

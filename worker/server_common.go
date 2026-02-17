@@ -19,11 +19,16 @@ func (w *Worker) serverPrepareSetup(node *types.UserNode, server *types.Minetest
 		return fmt.Errorf("server entity update error: %v", err)
 	}
 
+	zone, _, err := w.hc.Zone.GetByName(context.Background(), w.cfg.HetznerZoneName)
+	if err != nil {
+		return fmt.Errorf("could not get zone '%s': %v", w.cfg.HetznerZoneName, err)
+	}
+
 	record_name := fmt.Sprintf("%s%s", server.DNSName, w.cfg.DNSRecordSuffix)
 	record_value := fmt.Sprintf("%s%s", node.Name, w.cfg.DNSRecordSuffix)
 	if server.ExternalCNAMEDNSID == "" {
 		// create new record
-		record, _, err := w.hc.Zone.CreateRRSet(context.Background(), &hcloud.Zone{Name: w.cfg.HetznerZoneName}, hcloud.ZoneRRSetCreateOpts{
+		record, _, err := w.hc.Zone.CreateRRSet(context.Background(), zone, hcloud.ZoneRRSetCreateOpts{
 			Name: record_name,
 			Type: hcloud.ZoneRRSetTypeCNAME,
 			TTL:  hcloud.Ptr(300),
@@ -38,7 +43,7 @@ func (w *Worker) serverPrepareSetup(node *types.UserNode, server *types.Minetest
 
 	} else {
 		// check if record matches config
-		rrset, _, err := w.hc.Zone.GetRRSetByID(context.Background(), &hcloud.Zone{Name: w.cfg.HetznerZoneName}, server.ExternalCNAMEDNSID)
+		rrset, _, err := w.hc.Zone.GetRRSetByID(context.Background(), zone, server.ExternalCNAMEDNSID)
 		if err != nil {
 			return fmt.Errorf("could not fetch current cname with id: '%s': %v", server.ExternalCNAMEDNSID, err)
 		}
@@ -50,7 +55,7 @@ func (w *Worker) serverPrepareSetup(node *types.UserNode, server *types.Minetest
 		if rrset.Name != record_name || record.Value != record_value {
 			// values changed, remove and recreate
 			_, _, err = w.hc.Zone.DeleteRRSet(context.Background(), &hcloud.ZoneRRSet{
-				Zone: &hcloud.Zone{Name: w.cfg.HetznerZoneName},
+				Zone: zone,
 				ID:   server.ExternalCNAMEDNSID,
 			})
 			if err != nil {
@@ -84,9 +89,14 @@ func (w *Worker) removeServer(node *types.UserNode, server *types.MinetestServer
 		return fmt.Errorf("server entity update error: %v", err)
 	}
 
+	zone, _, err := w.hc.Zone.GetByName(context.Background(), w.cfg.HetznerZoneName)
+	if err != nil {
+		return fmt.Errorf("could not get zone '%s': %v", w.cfg.HetznerZoneName, err)
+	}
+
 	if server.ExternalCNAMEDNSID != "" {
 		_, _, err = w.hc.Zone.DeleteRRSet(context.Background(), &hcloud.ZoneRRSet{
-			Zone: &hcloud.Zone{Name: w.cfg.HetznerZoneName},
+			Zone: zone,
 			ID:   server.ExternalCNAMEDNSID,
 		})
 		if err != nil {

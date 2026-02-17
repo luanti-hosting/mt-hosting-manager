@@ -136,6 +136,11 @@ func (w *Worker) NodeDestroy(job *types.Job) error {
 			}
 		}
 
+		zone, _, err := w.hc.Zone.GetByName(context.Background(), w.cfg.HetznerZoneName)
+		if err != nil {
+			return fmt.Errorf("could not get zone '%s': %v", w.cfg.HetznerZoneName, err)
+		}
+
 		if node.ExternalID != "" {
 			server_id, err := strconv.ParseInt(node.ExternalID, 10, 32)
 			if err != nil {
@@ -156,7 +161,7 @@ func (w *Worker) NodeDestroy(job *types.Job) error {
 
 		if node.ExternalIPv4DNSID != "" {
 			_, _, err = w.hc.Zone.DeleteRRSet(context.Background(), &hcloud.ZoneRRSet{
-				Zone: &hcloud.Zone{Name: w.cfg.HetznerZoneName},
+				Zone: zone,
 				ID:   node.ExternalIPv4DNSID,
 			})
 			if err != nil {
@@ -171,7 +176,7 @@ func (w *Worker) NodeDestroy(job *types.Job) error {
 
 		if node.ExternalIPv6DNSID != "" {
 			_, _, err = w.hc.Zone.DeleteRRSet(context.Background(), &hcloud.ZoneRRSet{
-				Zone: &hcloud.Zone{Name: w.cfg.HetznerZoneName},
+				Zone: zone,
 				ID:   node.ExternalIPv6DNSID,
 			})
 			if err != nil {
