@@ -1,4 +1,4 @@
-FROM node:25.0.0-alpine as node-app
+FROM node:25.6.0-alpine as node-app
 WORKDIR /public
 COPY /public/package-lock.json /public/package.json ./
 RUN npm ci
@@ -15,7 +15,7 @@ COPY --from=node-app /public /data/public
 RUN go test ./... && \
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build .
 
-FROM alpine:3.23.0
+FROM alpine:3.23.3
 COPY --from=go-app /data/mt-hosting-manager /.
 EXPOSE 8080
 CMD ["/mt-hosting-manager"]

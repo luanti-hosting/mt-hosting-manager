@@ -2,6 +2,8 @@ import { logout, get_claims, is_logged_in, has_role } from '../service/login.js'
 import { get_stage } from '../service/info.js';
 import { get_balance } from '../service/user.js';
 
+import { get_open_tickets } from '../service/service_ticket.js';
+
 import CurrencyDisplay from './CurrencyDisplay.js';
 import ThemeSwitcher from './ThemeSwitcher.js';
 
@@ -25,7 +27,8 @@ export default {
 	computed: {
 		is_logged_in: is_logged_in,
 		claims: get_claims,
-		balance: get_balance
+		balance: get_balance,
+		open_tickets: get_open_tickets
 	},
 	template: /*html*/`
 		<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -73,6 +76,15 @@ export default {
 					<li class="nav-item" v-if="is_logged_in">
 						<router-link to="/overview" class="nav-link">
 							<i class="fa fa-map"></i> Overview
+						</router-link>
+					</li>
+					<li class="nav-item">
+						<router-link to="/tickets" class="nav-link" v-if="is_logged_in">
+							<i class="fa fa-ticket"></i> Service-Ticket
+							<span class="badge bg-danger" v-if="open_tickets.length > 0">
+								{{ open_tickets.length }}
+								<i class="fa fa-bell"></i>
+							</span>
 						</router-link>
 					</li>
 					<li class="nav-item" v-if="has_role('ADMIN')">

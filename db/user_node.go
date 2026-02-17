@@ -23,18 +23,11 @@ func (r *UserNodeRepository) Update(n *types.UserNode) error {
 }
 
 func (r *UserNodeRepository) GetByID(id string) (*types.UserNode, error) {
-	var list []*types.UserNode
-	err := r.g.Where(types.UserNode{ID: id}).Limit(1).Find(&list).Error
-	if len(list) == 0 {
-		return nil, err
-	}
-	return list[0], err
+	return FindSingle[types.UserNode](r.g.Where(types.UserNode{ID: id}))
 }
 
 func (r *UserNodeRepository) GetAll() ([]*types.UserNode, error) {
-	var list []*types.UserNode
-	err := r.g.Where(types.UserNode{}).Find(&list).Error
-	return list, err
+	return FindMulti[types.UserNode](r.g.Where(types.UserNode{}))
 }
 
 func (r *UserNodeRepository) Delete(id string) error {
@@ -64,7 +57,5 @@ func (r *UserNodeRepository) Search(search *types.UserNodeSearch) ([]*types.User
 		q = q.Where("valid_until < ?", *search.ValidUntil)
 	}
 
-	var list []*types.UserNode
-	err := q.Find(&list).Error
-	return list, err
+	return FindMulti[types.UserNode](q)
 }

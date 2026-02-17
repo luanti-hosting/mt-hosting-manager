@@ -14,10 +14,10 @@ type Repositories struct {
 	JobRepo                *JobRepository
 	PaymentTransactionRepo *PaymentTransactionRepository
 	AuditLogRepo           *AuditLogRepository
+	ServiceTicketRepo      *ServiceTicketRepository
 	BackupRepo             *BackupRepository
 	ExchangeRateRepo       *ExchangeRateRepository
 	CouponRepo             *CouponRepository
-	Lock                   *DBLock
 	g                      *gorm.DB
 }
 
@@ -32,10 +32,10 @@ func NewRepositories(g *gorm.DB) *Repositories {
 		JobRepo:                &JobRepository{g: g},
 		PaymentTransactionRepo: &PaymentTransactionRepository{g: g},
 		AuditLogRepo:           &AuditLogRepository{g: g},
+		ServiceTicketRepo:      &ServiceTicketRepository{g: g},
 		BackupRepo:             &BackupRepository{g: g},
 		ExchangeRateRepo:       &ExchangeRateRepository{g: g},
 		CouponRepo:             &CouponRepository{g: g},
-		Lock:                   &DBLock{g: g},
 		g:                      g,
 	}
 }

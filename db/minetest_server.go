@@ -19,22 +19,15 @@ func (r *MinetestServerRepository) Insert(n *types.MinetestServer) error {
 }
 
 func (r *MinetestServerRepository) Update(n *types.MinetestServer) error {
-	return r.g.Model(n).Updates(n).Error
+	return r.g.Model(n).Select("*").Updates(n).Error
 }
 
 func (r *MinetestServerRepository) GetByID(id string) (*types.MinetestServer, error) {
-	var list []*types.MinetestServer
-	err := r.g.Where(types.MinetestServer{ID: id}).Limit(1).Find(&list).Error
-	if len(list) == 0 {
-		return nil, err
-	}
-	return list[0], err
+	return FindSingle[types.MinetestServer](r.g.Where(types.MinetestServer{ID: id}))
 }
 
 func (r *MinetestServerRepository) GetAll() ([]*types.MinetestServer, error) {
-	var list []*types.MinetestServer
-	err := r.g.Where(types.MinetestServer{}).Find(&list).Error
-	return list, err
+	return FindMulti[types.MinetestServer](r.g.Where(types.MinetestServer{}))
 }
 
 func (r *MinetestServerRepository) Delete(id string) error {
@@ -60,7 +53,5 @@ func (r *MinetestServerRepository) Search(search *types.MinetestServerSearch) ([
 		q = q.Where(types.MinetestServer{State: *search.State})
 	}
 
-	var list []*types.MinetestServer
-	err := q.Find(&list).Error
-	return list, err
+	return FindMulti[types.MinetestServer](q)
 }

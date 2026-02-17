@@ -23,18 +23,11 @@ func (r *PaymentTransactionRepository) Update(tx *types.PaymentTransaction) erro
 }
 
 func (r *PaymentTransactionRepository) GetByID(id string) (*types.PaymentTransaction, error) {
-	var list []*types.PaymentTransaction
-	err := r.g.Where(types.PaymentTransaction{ID: id}).Limit(1).Find(&list).Error
-	if len(list) == 0 {
-		return nil, err
-	}
-	return list[0], err
+	return FindSingle[types.PaymentTransaction](r.g.Where(types.PaymentTransaction{ID: id}))
 }
 
 func (r *PaymentTransactionRepository) GetByUserID(user_id string) ([]*types.PaymentTransaction, error) {
-	var list []*types.PaymentTransaction
-	err := r.g.Where(types.PaymentTransaction{UserID: user_id}).Find(&list).Error
-	return list, err
+	return FindMulti[types.PaymentTransaction](r.g.Where(types.PaymentTransaction{UserID: user_id}))
 }
 
 func (r *PaymentTransactionRepository) Delete(id string) error {
@@ -55,7 +48,5 @@ func (r *PaymentTransactionRepository) Search(s *types.PaymentTransactionSearch)
 
 	q = q.Order("created desc").Limit(1000)
 
-	var list []*types.PaymentTransaction
-	err := q.Find(&list).Error
-	return list, err
+	return FindMulti[types.PaymentTransaction](q)
 }

@@ -15,7 +15,7 @@ export default {
         "node-type-spec": NodeTypeSpec
 	},
     data: function() {
-        const nt = get_nodetypes()[0];
+        const nt = get_nodetypes().filter(nt => nt.state == "ACTIVE")[0];
         return {
             nodetype_id: nt.id,
             location: nt.locations.split(",")[0],

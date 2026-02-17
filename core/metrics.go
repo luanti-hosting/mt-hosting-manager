@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/prometheus/common/expfmt"
+	"github.com/prometheus/common/model"
 )
 
 type NodeExporterMetrics struct {
@@ -22,7 +23,7 @@ func ParseNodeExporterMetrics(data []byte) (*NodeExporterMetrics, error) {
 
 	metrics := &NodeExporterMetrics{}
 
-	var parser expfmt.TextParser
+	parser := expfmt.NewTextParser(model.LegacyValidation)
 	mfs, err := parser.TextToMetricFamilies(bytes.NewBuffer(data))
 	if err != nil {
 		return nil, fmt.Errorf("metric parsing failed: %v", err)

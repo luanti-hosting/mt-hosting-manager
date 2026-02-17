@@ -13,9 +13,9 @@ require (
 	github.com/minetest-go/oauth v1.0.2
 	github.com/minio/minio-go/v7 v7.0.92
 	github.com/oschwald/geoip2-golang v1.11.0
-	github.com/pkg/sftp v1.13.7
 	github.com/prometheus/client_golang v1.23.2
 	github.com/prometheus/common v0.66.1
+	github.com/pkg/sftp v1.13.10
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.11.1
 	github.com/vearutop/statigz v1.4.3
