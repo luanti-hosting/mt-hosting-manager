@@ -109,8 +109,8 @@ export default {
             </tbody>
         </table>
         <div class="input-group" v-if="ticket && ticket.state == 'OPEN'">
-            <input type="text" placeholder="Response text" class="form-control" v-model="response_text"/>
-            <button class="btn btn-outline-secondary" v-on:click="send_message">
+            <textarea placeholder="Response text" class="form-control" v-model="response_text"/>
+            <button class="btn btn-outline-secondary" v-on:click="send_message" :disabled="!response_text">
                 <i class="fa fa-envelope"></i>
             </button>
         </div>
