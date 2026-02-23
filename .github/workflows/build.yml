@@ -76,7 +76,7 @@ jobs:
     steps:
     - name: Trigger deployment on hosting.luanti.ch
       if: success() && github.ref == 'refs/heads/master'
-      uses: benc-uk/workflow-dispatch@v1.2.4
+      uses: benc-uk/workflow-dispatch@v1.3.1
       with:
         workflow: deploy
         repo: luanti-hosting/hosting.luanti.ch
