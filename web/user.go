@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (a *Api) SearchUser(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) SearchUser(w http.ResponseWriter, r *http.Request) {
 	s := &types.UserSearch{}
 	err := json.NewDecoder(r.Body).Decode(s)
 	if err != nil {
@@ -20,11 +20,6 @@ func (a *Api) SearchUser(w http.ResponseWriter, r *http.Request, c *types.Claims
 	for _, u := range list {
 		u.RemoveSensitiveFields()
 	}
-	Send(w, list, err)
-}
-
-func (a *Api) GetUsers(w http.ResponseWriter, r *http.Request, c *types.Claims) {
-	list, err := a.repos.UserRepo.GetAll()
 	Send(w, list, err)
 }
 
@@ -44,7 +39,7 @@ func (a *Api) GetUserByID(w http.ResponseWriter, r *http.Request, c *types.Claim
 	Send(w, user, err)
 }
 
-func (a *Api) SaveUser(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) SaveUser(w http.ResponseWriter, r *http.Request) {
 	updated_user := &types.User{}
 	err := json.NewDecoder(r.Body).Decode(updated_user)
 	if err != nil {

@@ -22,7 +22,7 @@ func (a *Api) GetNodeType(w http.ResponseWriter, r *http.Request) {
 	Send(w, nt, err)
 }
 
-func (a *Api) CreateNodeType(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) CreateNodeType(w http.ResponseWriter, r *http.Request) {
 	nt := &types.NodeType{}
 	err := json.NewDecoder(r.Body).Decode(nt)
 	if err != nil {
@@ -33,7 +33,7 @@ func (a *Api) CreateNodeType(w http.ResponseWriter, r *http.Request, c *types.Cl
 	Send(w, nt, err)
 }
 
-func (a *Api) UpdateNodeType(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) UpdateNodeType(w http.ResponseWriter, r *http.Request) {
 	nt := &types.NodeType{}
 	err := json.NewDecoder(r.Body).Decode(nt)
 	if err != nil {
@@ -44,7 +44,7 @@ func (a *Api) UpdateNodeType(w http.ResponseWriter, r *http.Request, c *types.Cl
 	Send(w, nt, err)
 }
 
-func (a *Api) DeleteNodeType(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) DeleteNodeType(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	err := a.repos.NodeTypeRepo.Delete(vars["id"])
 	Send(w, true, err)
