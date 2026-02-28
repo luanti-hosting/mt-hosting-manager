@@ -10,11 +10,11 @@ import (
 )
 
 type ProvisionModel struct {
-	Config *types.Config
-	UserID string
+	Config   *types.Config
+	UserNode *types.UserNode
 }
 
-func Provision(client *ssh.Client, cfg *types.Config, userID string) error {
+func Provision(client *ssh.Client, cfg *types.Config, node *types.UserNode) error {
 	session, err := client.NewSession()
 	if err != nil {
 		return fmt.Errorf("could not open session: %v", err)
@@ -54,7 +54,12 @@ func Provision(client *ssh.Client, cfg *types.Config, userID string) error {
 		return fmt.Errorf("could not write setup.sh: %v", err)
 	}
 
-	err = core.SCPWriteFile(sftp, Files, "docker-compose.yml", "/provision/docker-compose.yml", 0644, true)
+	m := &ProvisionModel{
+		Config:   cfg,
+		UserNode: node,
+	}
+
+	err = core.SCPTemplateFile(sftp, Files, "docker-compose.yml", "/provision/docker-compose.yml", 0644, true, m)
 	if err != nil {
 		return fmt.Errorf("could not write file: %v", err)
 	}

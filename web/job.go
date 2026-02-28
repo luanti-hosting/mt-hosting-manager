@@ -9,12 +9,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (a *Api) GetJobs(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) GetJobs(w http.ResponseWriter, r *http.Request) {
 	list, err := a.repos.JobRepo.GetAll()
 	Send(w, list, err)
 }
 
-func (a *Api) RetryJob(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) RetryJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	job, err := a.repos.JobRepo.GetByID(id)
@@ -35,7 +35,7 @@ func (a *Api) RetryJob(w http.ResponseWriter, r *http.Request, c *types.Claims) 
 	Send(w, job, err)
 }
 
-func (a *Api) DeleteJob(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) DeleteJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	err := a.repos.JobRepo.Delete(vars["id"])
 	Send(w, true, err)

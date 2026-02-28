@@ -48,7 +48,7 @@ services:
   restart: always
 
  nginx-{{.ServerShortID}}:
-  image: nginx:1.25.2
+  image: nginx:{{.Server.NginxVersion}}
   networks:
    - terminator
    - network-{{.ServerShortID}}

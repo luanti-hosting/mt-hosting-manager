@@ -91,7 +91,7 @@ func (a *Api) RedeemCoupon(w http.ResponseWriter, r *http.Request, c *types.Clai
 	}, true)
 }
 
-func (a *Api) CreateCoupon(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) CreateCoupon(w http.ResponseWriter, r *http.Request) {
 	coupon := &types.Coupon{}
 	err := json.NewDecoder(r.Body).Decode(coupon)
 	if err != nil {
@@ -103,7 +103,7 @@ func (a *Api) CreateCoupon(w http.ResponseWriter, r *http.Request, c *types.Clai
 	Send(w, coupon, err)
 }
 
-func (a *Api) UpdateCoupon(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) UpdateCoupon(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	coupon, err := a.repos.CouponRepo.GetByID(id)
@@ -133,14 +133,14 @@ func (a *Api) UpdateCoupon(w http.ResponseWriter, r *http.Request, c *types.Clai
 	Send(w, coupon, err)
 }
 
-func (a *Api) GetCoupon(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) GetCoupon(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	coupon, err := a.repos.CouponRepo.GetByID(id)
 	Send(w, coupon, err)
 }
 
-func (a *Api) GetCouponUsers(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) GetCouponUsers(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	redeemed_coupons, err := a.repos.CouponRepo.GetRedeemedCoupons(id)
@@ -164,7 +164,7 @@ func (a *Api) GetCouponUsers(w http.ResponseWriter, r *http.Request, c *types.Cl
 	Send(w, user_list, err)
 }
 
-func (a *Api) GetCoupons(w http.ResponseWriter, r *http.Request, c *types.Claims) {
+func (a *Api) GetCoupons(w http.ResponseWriter, r *http.Request) {
 	list, err := a.repos.CouponRepo.GetAll()
 	Send(w, list, err)
 }

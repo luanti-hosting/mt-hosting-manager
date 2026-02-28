@@ -164,7 +164,7 @@ func (w *Worker) NodeProvision(job *types.Job) error {
 		if err != nil {
 			return fmt.Errorf("ssh try error: %v", err)
 		}
-		err = provision.Provision(client, w.cfg, node.UserID)
+		err = provision.Provision(client, w.cfg, node)
 		if err != nil {
 			return fmt.Errorf("provision error: %v", err)
 		}
