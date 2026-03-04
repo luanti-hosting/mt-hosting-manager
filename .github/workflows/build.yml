@@ -59,7 +59,7 @@ jobs:
 
     - name: Log in to the Container registry
       if: success() && github.ref == 'refs/heads/master'
-      uses: docker/login-action@v3
+      uses: docker/login-action@v4
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
