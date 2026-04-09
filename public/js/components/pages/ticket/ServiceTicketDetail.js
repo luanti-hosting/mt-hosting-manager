@@ -5,8 +5,9 @@ import format_time from "../../../util/format_time.js";
 import { search_tickets, get_messages, create_message, update_ticket } from "../../../api/service_ticket.js";
 import { fetch_tickets } from "../../../service/service_ticket.js";
 import { get_cached_user } from "../../../service/user_cache.js";
+import { get_user_profile } from "../../../service/user.js";
 
-export const ServiceTicketBreadcrumb = {icon: "ticket", name: "Service tickets", link: "/tickets"};
+export const ServiceTicketBreadcrumb = { icon: "ticket", name: "Service tickets", link: "/tickets" };
 
 export default {
     props: ["id"],
@@ -14,7 +15,7 @@ export default {
         "card-layout": CardLayout,
         "ticket-state-badge": TicketStateBadge
     },
-    data: function() {
+    data: function () {
         return {
             breadcrumb: [ServiceTicketBreadcrumb, {
                 icon: "ticket",
@@ -28,7 +29,8 @@ export default {
     },
     methods: {
         format_time,
-        send_message: async function() {
+        get_user_profile,
+        send_message: async function () {
             const msg = await create_message({
                 ticket_id: this.id,
                 message: this.response_text
@@ -37,30 +39,30 @@ export default {
             msg.user = await get_cached_user(msg.user_id);
             this.messages.push(msg);
         },
-        mark_resolved: async function(){
+        mark_resolved: async function () {
             this.ticket.state = "RESOLVED";
             await update_ticket(this.ticket);
             await fetch_tickets();
         },
-        close: async function() {
+        close: async function () {
             this.ticket.state = "CLOSED";
             await update_ticket(this.ticket);
             await fetch_tickets();
         },
-        reopen: async function() {
+        reopen: async function () {
             this.ticket.state = "OPEN";
             await update_ticket(this.ticket);
             await fetch_tickets();
         }
     },
-    mounted: async function() {
+    mounted: async function () {
         const tickets = await search_tickets({ ticket_id: this.id });
         if (tickets) {
             this.ticket = tickets[0];
         }
 
         const messages = await get_messages(this.id);
-        for (let i=0; i<messages.length; i++) {
+        for (let i = 0; i < messages.length; i++) {
             const msg = messages[i];
             msg.user = await get_cached_user(msg.user_id);
         }
@@ -100,7 +102,8 @@ export default {
                 <tr v-for="msg in messages" :key="msg.id">
                     <td>
                         {{ format_time(msg.timestamp) }}
-                        <span class="badge bg-secondary">{{ msg.user.name }}</span>
+                        <span v-if="get_user_profile().name == msg.user.name" class="badge bg-primary">{{ msg.user.name }}</span>
+                        <span v-else class="badge bg-secondary">{{ msg.user.name }}</span>
                     </td>
                     <td>
                         <pre>{{ msg.message }}</pre>
@@ -108,9 +111,10 @@ export default {
                 </tr>
             </tbody>
         </table>
-        <div class="input-group" v-if="ticket && ticket.state == 'OPEN'">
-            <input type="text" placeholder="Response text" class="form-control" v-model="response_text"/>
-            <button class="btn btn-outline-secondary" v-on:click="send_message">
+        <div v-if="ticket && ticket.state == 'OPEN'">
+            <textarea type="text" placeholder="Response text" class="form-control" v-model="response_text">
+            </textarea>
+            <button class="btn btn-outline-secondary w-100" v-on:click="send_message">
                 <i class="fa fa-envelope"></i>
             </button>
         </div>
