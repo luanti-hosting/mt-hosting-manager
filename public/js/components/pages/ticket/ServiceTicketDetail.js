@@ -114,16 +114,16 @@ export default {
         <div v-if="ticket && ticket.state == 'OPEN'">
             <textarea type="text" placeholder="Response text" class="form-control" v-model="response_text">
             </textarea>
-            <button class="btn btn-outline-secondary w-100" v-on:click="send_message">
+            <button class="btn btn-success w-100" v-on:click="send_message" :disabled="!response_text">
                 <i class="fa fa-envelope"></i>
             </button>
         </div>
         <br>
         <div class="btn-group w-100" v-if="ticket && ticket.state == 'OPEN'">
-            <button class="btn btn-success" v-on:click="mark_resolved">
+            <button class="btn btn-outline-success" v-on:click="mark_resolved">
                 Mark as resolved
             </button>
-            <button class="btn btn-secondary" v-on:click="close">
+            <button class="btn btn-outline-secondary" v-on:click="close">
                 Close ticket
             </button>
         </div>
