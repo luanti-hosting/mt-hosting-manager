@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
  exporter:
-  image: prom/node-exporter:v1.6.1
+  image: prom/node-exporter:v1.11.1
   restart: always
   volumes:
     - /proc:/host/proc:ro
@@ -17,7 +17,7 @@ services:
   network_mode: "host"
 
  traefik:
-  image: traefik:v3.1
+  image: traefik:v3.6
   restart: always
   depends_on:
    - ipv6nat
